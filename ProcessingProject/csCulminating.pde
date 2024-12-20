@@ -1,8 +1,8 @@
 /**
 * This program is a game in which the user plays as a knight fighting against monsters and trying to survive through increasingly difficult waves.
 * When run, the user is presented with a game menu in which they can access settings, save their game, and 
-* The user can press a and d to move left or right, space to jump, and j to attack.
-*
+* The user can press a and d to move left or right, space to jump, and j to attack. 
+* 
 * @author  Ethan Lau
 * @version 1.0
 * @since   2024-1-1
@@ -40,9 +40,9 @@ int[] zombieAttackDisplacement = new int [MAX_ZOMBIES];
 
 
 //character attributes:
-//Character starting coordinates
-int characterY = 450; //on the ground
-int characterX = 700; //middle of the screen
+//character coordinates
+int characterY = 450; //start on the ground
+int characterX = 700; //start in middle of the screen
 
 boolean facingRight = true;
 boolean characterUp = true;
