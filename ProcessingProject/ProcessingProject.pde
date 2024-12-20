@@ -13,7 +13,8 @@
 //GLOBAL VARIABLES: CAN BE USED IN ANY METHOD
 
 //zombie attributes:
-double zombieSpeed = 1.2; //pixels moved per frame
+double zombieSpeed = 1.2; //pixels moved per frame, will be changed to increase difficulty
+final int ZOMBIE_JUMP_SPEED = 16 * zombieSpeed; //pixels moved per frame
 final int MAX_ZOMBIES = 20; //arbitrary number, set relatively small to save memory
 final int ZOMBIE_Y = 440; //zombies can't jump or move up so their y is a constant
 final int ZOMBIE_SPAWN_FREQUENCY = 300; //frames between zombie spawing
@@ -40,6 +41,11 @@ int[] zombieAttackDisplacement = new int [MAX_ZOMBIES];
 
 //stores which zombies are doing damage to character
 boolean[] zombieDamaging = new boolean[MAX_ZOMBIES];
+
+//zombie attack animation frames
+final int ZOMBIE_JUMP_FRAME = 30; //frame to jump forward
+final int ZOMBIE_ATTACK_END_FRAME = 60; //frame to end attack animation
+final int ZOMBIE_MAX_ATTACK_DISPLACEMENT = 200; //how far the zombie should travel when jumping
 
 
 //character attributes:
@@ -486,42 +492,50 @@ void spawnZombie() {
 * post: zombie attack left animation has been progressed by one frame
 */
 void zombieAttackLeft(int zombieNum) { 
-  //
+  //if the attack hasn't started
   if (zombieAttackFrame[zombieNum] < 0) {
     zombieAttackFrame[zombieNum] = 0;
     image(zombieLeftAttack, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
     zombieAttackFrame[zombieNum]++;
   
-  //frames 0-49: wind up attack
-  } else if (zombieAttackFrame[zombieNum] >= 0 && zombieAttackFrame[zombieNum] < 50) { 
+  //wind up attack
+  } else if (zombieAttackFrame[zombieNum] >= 0 && zombieAttackFrame[zombieNum] < ZOMBIE_JUMP_FRAME) { 
     image(zombieLeftAttack, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
     zombieAttackFrame[zombieNum]++;
-    
-  } else if (zombieAttackFrame[zombieNum] == 50) { //frame 50: jump forward - frame counting stops and displacement counting starts
-    zombieX[zombieNum] -= 16 * zombieSpeed;
-    zombieAttackDisplacement[zombieNum] += 16 * zombieSpeed;
+	
+	//jump forward - frame counting stops and displacement counting starts
+  } else if (zombieAttackFrame[zombieNum] == ZOMBIE_JUMP_FRAME) { 
+    zombieX[zombieNum] -= ZOMBIE_JUMP_SPEED;
+    zombieAttackDisplacement[zombieNum] += ZOMBIE_JUMP_SPEED;
     image(zombieLeftUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
-    if (Math.abs(zombieX[zombieNum] - characterX) >= 16 * zombieSpeed && characterY > 350) {
+		
+		//check if zombie was near character (should do damage)
+    if (Math.abs(zombieX[zombieNum] - characterX) <= ZOMBIE_JUMP_SPEED && characterY > 350) {
       zombieDamaging[zombieNum] = true;
     }
-    if (zombieAttackDisplacement[zombieNum] > 200) {
+		
+		//check if zombie has travelled the full attack displacement
+    if (zombieAttackDisplacement[zombieNum] > ZOMBIE_MAX_ATTACK_DISPLACEMENT) {
       zombieAttackFrame[zombieNum]++;
-    }
-    
-  } else if (zombieAttackFrame[zombieNum] > 50 && zombieAttackFrame[zombieNum] <= 110) { //frames 16-25: stand still - frame counting restarts and displacement counting stops
-    image(zombieLeftUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
-    zombieAttackFrame[zombieNum]++;
-    zombieAttackDisplacement[zombieNum] = 0;
-    
-  } else if (zombieAttackFrame[zombieNum] > 110) {
-    zombieAttackFrame[zombieNum] = -1;
-    zombieState[zombieNum] = 1;
-    image(zombieLeftUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
-    if (zombieDamaging[zombieNum]) {
+			if (zombieDamaging[zombieNum]) {
       characterHp--;
       println(characterHp);
       zombieDamaging[zombieNum] = false;
     }
+  }
+	
+	//stand still - frame counting restarts and displacement counting stops
+  } else if (zombieAttackFrame[zombieNum] > ZOMBIE_JUMP_FRAME && zombieAttackFrame[zombieNum] <= ZOMBIE_ATTACK_END_FRAME) { 
+    image(zombieLeftUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+    zombieAttackFrame[zombieNum]++;
+    zombieAttackDisplacement[zombieNum] = 0;
+	
+	//stop attack animation
+  } else if (zombieAttackFrame[zombieNum] > ZOMBIE_ATTACK_END_FRAME) {
+    zombieAttackFrame[zombieNum] = -1;
+    zombieState[zombieNum] = 1;
+    image(zombieLeftUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+    
   }
   
           
@@ -541,37 +555,44 @@ void zombieAttackRight(int zombieNum) {
       image(zombieRightAttack, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       zombieAttackFrame[zombieNum]++;
       
-    //frames 0-49: wind up attack
-    } else if (zombieAttackFrame[zombieNum] >= 0 && zombieAttackFrame[zombieNum] < 50) {
+    //wind up attack
+    } else if (zombieAttackFrame[zombieNum] >= 0 && zombieAttackFrame[zombieNum] < ZOMBIE_JUMP_FRAME) {
       image(zombieRightAttack, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       zombieAttackFrame[zombieNum]++;
-      
-    } else if (zombieAttackFrame[zombieNum] == 50) { //frame 50: jump forward - frame counting stops and displacement counting starts
-      zombieX[zombieNum] += 16 * zombieSpeed;
-      zombieAttackDisplacement[zombieNum] += 16 * zombieSpeed;
+			
+  	//jump forward - **FRAME COUNTING STOPS** and displacement counting starts
+    } else if (zombieAttackFrame[zombieNum] == ZOMBIE_JUMP_FRAME) { 
+      zombieX[zombieNum] += ZOMBIE_JUMP_SPEED;
+      zombieAttackDisplacement[zombieNum] += ZOMBIE_JUMP_SPEED;
       image(zombieRightUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
-      if (Math.abs(zombieX[zombieNum] - characterX) >= 16 * zombieSpeed && characterY > 350) {
+			
+			//check if zombie was near character (should do damage)
+      if (Math.abs(zombieX[zombieNum] - characterX) <= ZOMBIE_JUMP_SPEED && characterY > 350) {
         zombieDamaging[zombieNum] = true;
       }
-      if (zombieAttackDisplacement[zombieNum] > 200) {
+			
+			//check if zombie has travelled the full attack displacement
+      if (zombieAttackDisplacement[zombieNum] > ZOMBIE_MAX_ATTACK_DISPLACEMENT) {
         zombieAttackFrame[zombieNum]++;
+				if (zombieDamaging[zombieNum]) {
+					characterHp--;
+					println(characterHp);
+					zombieDamaging[zombieNum] = false;
+				}
       }
       
-      
-    } else if (zombieAttackFrame[zombieNum] > 50 && zombieAttackFrame[zombieNum] <= 110) { //frames 16-25: stand still - frame counting restarts and displacement counting stops
+  	//stand still - frame counting restarts and displacement counting stops
+    } else if (zombieAttackFrame[zombieNum] > ZOMBIE_JUMP_FRAME && zombieAttackFrame[zombieNum] <= ZOMBIE_ATTACK_END_FRAME) { 
       image(zombieRightUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       zombieAttackFrame[zombieNum]++;
       zombieAttackDisplacement[zombieNum] = 0;
       
-    } else if (zombieAttackFrame[zombieNum] > 110) {
+		//stop attack animation
+    } else if (zombieAttackFrame[zombieNum] > ZOMBIE_ATTACK_END_FRAME) {
       zombieAttackFrame[zombieNum] = -1;
       zombieState[zombieNum] = 3;
       image(zombieRightUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
-      if (zombieDamaging[zombieNum]) {
-        characterHp--;
-        println(characterHp);
-        zombieDamaging[zombieNum] = false;
-      }
+      
     }
 
 }
