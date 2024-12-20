@@ -179,11 +179,9 @@ void draw() {
           
         } else if (characterX - zombieX[i] >= 0 && characterX - zombieX[i] < 100 ) { //moving right attacking
           zombieState[i] = 4;
-          println("set to 4");
           
         } else if (zombieX[i] - characterX >= 0 && zombieX[i] - characterX < 100) { //moving left attacking
           zombieState[i] = 2;
-          println("set to 2");
         }
       }
       
