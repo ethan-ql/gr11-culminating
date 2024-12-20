@@ -177,6 +177,22 @@ void draw() {
   //set background colour
   background(30, 10, 50);
   
+  //draw a platform on left side
+  stroke(100, 50, 40);
+  fill(100, 50, 40);
+  rect(300, 350, 200, 20);
+  stroke(90, 40, 30);
+  fill(90, 40, 30);
+  rect(300, 350, 200, 5);
+  
+  //draw a platform right side
+  stroke(100, 50, 40);
+  fill(100, 50, 40);
+  rect(900, 350, 200, 20);
+  stroke(90, 40, 30);
+  fill(90, 40, 30);
+  rect(900, 350, 200, 5);
+  
   //SPAWNING ZOMBIES
   //call spawnZombie method for every set number of frames
   if (frameCount % ZOMBIE_SPAWN_FREQUENCY == 0) {
@@ -185,10 +201,10 @@ void draw() {
   
   //CHARACTER MOVEMENT:
   //check if character is on screen and which direction it should move, move it accordingly
-  if (moveRight && characterX < 1400) {
+  if (moveRight) {
     characterX += CHARACTER_SPEED;
   }
-  if (moveLeft && characterX > 0) {
+  if (moveLeft) {
     characterX -= CHARACTER_SPEED;
   }
   
@@ -254,12 +270,12 @@ void draw() {
       rectMode(CORNER);
       noStroke();
       fill(255, 0, 0);
-      rect((int) zombieHpBarX[i], ZOMBIE_Y - 70, zombieHp[i] * 0.65, 10);
+      rect((int) zombieHpBarX[i], ZOMBIE_Y - 75, zombieHp[i] * 0.65, 10);
       
       stroke(200, 200, 200);
       strokeWeight(4);
       noFill();
-      rect((int) zombieHpBarX[i], ZOMBIE_Y - 70, 65, 10);
+      rect((int) zombieHpBarX[i], ZOMBIE_Y - 75, 65, 10);
       strokeWeight(0);
       
   
@@ -320,7 +336,7 @@ void draw() {
   if (attacking) {
     
     if (attackFrame == 0) {
-      attackCooldown = 40;
+      attackCooldown = 20;
     }
     
     attackFrame++;
@@ -359,20 +375,37 @@ void draw() {
     attackCooldown--;
   }
   
-  println(attackCooldown);
+  
   
   //Character health bar:
   rectMode(CORNER);
   noStroke();
-  fill(255, 0, 0);
+  fill(255, 20, 20);
   rect(50, 50, characterHp * 3, 60);
   
   stroke(200, 200, 200);
   strokeWeight(12);
   noFill();
   rect(50, 50, 300, 60);
+  
+  //Character attack cooldown bar:
+  rectMode(CORNER);
+  noStroke();
+  fill(20, 20, 255);
+  rect(1150, 50, attackCooldown * 10, 60);
+  
+  stroke(200, 200, 200);
+  strokeWeight(12);
+  noFill();
+  rect(1150, 50, 200, 60);
   strokeWeight(0);
   
+  //ensure character stays on screen
+  if (characterX > 1400) {
+    characterX = 1400;
+  } else if (characterX < 0) {
+    characterX = 0;
+  }
   
   //SHOW CHARACTER:
   imageMode(CENTER);
@@ -415,21 +448,7 @@ void draw() {
   } 
   
   
-  //draw a platform on left side
-  stroke(100, 50, 40);
-  fill(100, 50, 40);
-  rect(300, 350, 200, 20);
-  stroke(90, 40, 30);
-  fill(90, 40, 30);
-  rect(300, 350, 200, 5);
-  
-  //draw a platform right side
-  stroke(100, 50, 40);
-  fill(100, 50, 40);
-  rect(900, 350, 200, 20);
-  stroke(90, 40, 30);
-  fill(90, 40, 30);
-  rect(900, 350, 200, 5);
+
   
   //draw the ground
   stroke(100, 100, 100);
