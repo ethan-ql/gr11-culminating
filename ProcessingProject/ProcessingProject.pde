@@ -53,8 +53,8 @@ boolean[] zombieDamaging = new boolean[MAX_ZOMBIES];
 boolean[] zombieAttacked = new boolean[MAX_ZOMBIES];
 
 //zombie attack animation frames
-final int ZOMBIE_JUMP_FRAME = 30; //frame to jump forward
-final int ZOMBIE_ATTACK_END_FRAME = 60; //frame to end attack animation
+final int ZOMBIE_JUMP_FRAME = 20; //frame to jump forward
+final int ZOMBIE_ATTACK_END_FRAME = 50; //frame to end attack animation
 final int ZOMBIE_MAX_ATTACK_DISPLACEMENT = 200; //how far the zombie should travel when jumping
 
 
