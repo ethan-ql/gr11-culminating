@@ -17,14 +17,15 @@ double zombieSpeed = 1.2; //pixels moved per frame, will be changed to increase 
 int zombieDamage = 10; //% of character health per hit
 final double ZOMBIE_JUMP_SPEED = 16 * zombieSpeed; //pixels moved per frame
 final double ZOMBIE_KNOCKBACK = 10 * zombieSpeed; //pixels character moves per frame being hit by zombie
-final int MAX_ZOMBIES = 20; //arbitrary number, set relatively small to save memory
+final int MAX_ZOMBIES = 20; //arbitrary, set relatively small to save memory
 final int ZOMBIE_Y = 440; //zombies can't jump or move up so their y is a constant
-final int ZOMBIE_SPAWN_FREQUENCY = 200; //frames between zombie spawing
+final int ZOMBIE_SPAWN_FREQUENCY = 300; //frames between zombie spawing
+double zombieSpawnDistance = 0; //distance the zombie spawns from a side of the screen, will change every time a zombie spawns
 
 //zombie array attributes: stored in an array because these attributes can be different for each zombie
 
 //stores x pos of each zombie
-float[] zombieX = new float[MAX_ZOMBIES]; 
+double[] zombieX = new double[MAX_ZOMBIES]; 
 
 //stores whether each zombie is in up or down pos
 boolean[] zombieUp = new boolean[MAX_ZOMBIES]; 
@@ -44,7 +45,7 @@ double[] zombieHpBarX = new double[MAX_ZOMBIES];
 int[] zombieAttackFrame = new int[MAX_ZOMBIES];
 
 //stores how far the zombie has travelled while attacking
-int[] zombieAttackDisplacement = new int [MAX_ZOMBIES];
+int[] zombieAttackDisplacement = new int[MAX_ZOMBIES];
 
 //stores which zombies are doing damage to character
 boolean[] zombieDamaging = new boolean[MAX_ZOMBIES];
@@ -53,8 +54,8 @@ boolean[] zombieDamaging = new boolean[MAX_ZOMBIES];
 boolean[] zombieAttacked = new boolean[MAX_ZOMBIES];
 
 //zombie attack animation frames
-final int ZOMBIE_JUMP_FRAME = 20; //frame to jump forward
-final int ZOMBIE_ATTACK_END_FRAME = 50; //frame to end attack animation
+final int ZOMBIE_JUMP_FRAME = 30; //frame to jump forward
+final int ZOMBIE_ATTACK_END_FRAME = 60; //frame to end attack animation
 final int ZOMBIE_MAX_ATTACK_DISPLACEMENT = 200; //how far the zombie should travel when jumping
 
 
@@ -197,6 +198,7 @@ void draw() {
   //call spawnZombie method for every set number of frames
   if (frameCount % ZOMBIE_SPAWN_FREQUENCY == 0) {
     spawnZombie();
+    spawnZombie();
   }
   
   //CHARACTER MOVEMENT:
@@ -236,9 +238,9 @@ void draw() {
         case 1: //moving left
           zombieX[i] -= zombieSpeed;
           if (zombieUp[i]) { //up position
-            image(zombieLeftUp, zombieX[i], ZOMBIE_Y, 130, 130);
+            image(zombieLeftUp, (float) zombieX[i], ZOMBIE_Y, 130, 130);
           } else { //down position
-            image(zombieLeftDown, zombieX[i], ZOMBIE_Y, 130, 130);
+            image(zombieLeftDown, (float) zombieX[i], ZOMBIE_Y, 130, 130);
           }
           zombieHpBarX[i] = zombieX[i] - (55);
           break;
@@ -250,9 +252,9 @@ void draw() {
         case 3: //moving right
           zombieX[i] += zombieSpeed;
           if (zombieUp[i]) { //up position
-            image(zombieRightUp, zombieX[i], ZOMBIE_Y, 130, 130);
+            image(zombieRightUp, (float) zombieX[i], ZOMBIE_Y, 130, 130);
           } else { //down position
-            image(zombieRightDown, zombieX[i], ZOMBIE_Y, 130, 130);
+            image(zombieRightDown, (float) zombieX[i], ZOMBIE_Y, 130, 130);
           }
           zombieHpBarX[i] = zombieX[i] - 10;
           break;
@@ -392,7 +394,7 @@ void draw() {
   rectMode(CORNER);
   noStroke();
   fill(20, 20, 255);
-  rect(1150, 50, attackCooldown * 10, 60);
+  rect(1150, 50, 200 - attackCooldown * 10, 60);
   
   stroke(200, 200, 200);
   strokeWeight(12);
@@ -456,6 +458,12 @@ void draw() {
   rect(0, 500, 1400, 200);
   fill(60, 60, 60);
   rect(0, 500, 1400, 20);
+  for (int i = 0; i < MAX_ZOMBIES; i++) {
+    if (zombieDamaging[i]) {
+      fill(255, 0, 0, 50);
+      rect(0, 0, 1400, 700);
+    }
+  }
   
   //printAllValues();
   /*
@@ -561,8 +569,10 @@ boolean onLevel2() {
   return ((characterY > 290 && characterY < 315) && ((characterX > 280 && characterX < 520) || (characterX > 880 && characterX < 1120)));
 }
 
+
+
 /**
-* places a zombie on the left or right side of the screen 
+* places a zombie at a random distance (0-100 or 250-350 pixels) off of the left or right side of the screen 
 * pre: none
 * post: zombie placed 
 */
@@ -577,12 +587,20 @@ void spawnZombie() {
       
       //randomly decide whether to spawn on left or right side
       if (Math.random() < 0.5) { //left side       
-        zombieX[i] = -50;
+        zombieX[i] =  -65 - zombieSpawnDistance;
         zombieState[i] = 3;
         
       } else { //right side
-        zombieX[i] = 1450;
+        zombieX[i] = 1465 + zombieSpawnDistance;
         zombieState[i] = 1;
+      }
+      
+      
+      //alternate between 0-100 px from screen to 250-350 px from screen
+      if (zombieSpawnDistance < 100) {
+        zombieSpawnDistance = 250.0 + Math.random() * 100.0;
+      } else if (zombieSpawnDistance > 250) {
+        zombieSpawnDistance = Math.random() * 100.0;
       }
 
       
@@ -591,6 +609,7 @@ void spawnZombie() {
     }
   }
 }
+
 
 
 /**
@@ -603,12 +622,12 @@ void zombieAttackLeft(int zombieNum) {
   //if the attack hasn't started
   if (zombieAttackFrame[zombieNum] < 0) {
     zombieAttackFrame[zombieNum] = 0;
-    image(zombieLeftAttack, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+    image(zombieLeftAttack, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
     zombieAttackFrame[zombieNum]++;
   
   //wind up attack
   } else if (zombieAttackFrame[zombieNum] >= 0 && zombieAttackFrame[zombieNum] < ZOMBIE_JUMP_FRAME) { 
-    image(zombieLeftAttack, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+    image(zombieLeftAttack, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
     zombieAttackFrame[zombieNum]++;
     zombieHpBarX[zombieNum] = zombieX[zombieNum] - 10;
 	
@@ -616,7 +635,7 @@ void zombieAttackLeft(int zombieNum) {
   } else if (zombieAttackFrame[zombieNum] == ZOMBIE_JUMP_FRAME) { 
     zombieX[zombieNum] -= ZOMBIE_JUMP_SPEED;
     zombieAttackDisplacement[zombieNum] += ZOMBIE_JUMP_SPEED;
-    image(zombieLeftUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+    image(zombieLeftUp, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
     zombieHpBarX[zombieNum] = zombieX[zombieNum] - 55;
 		
 		//check if zombie was near character (should do damage)
@@ -636,7 +655,7 @@ void zombieAttackLeft(int zombieNum) {
 	
 	//stand still - frame counting restarts and displacement counting stops
   } else if (zombieAttackFrame[zombieNum] > ZOMBIE_JUMP_FRAME && zombieAttackFrame[zombieNum] <= ZOMBIE_ATTACK_END_FRAME) { 
-    image(zombieLeftUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+    image(zombieLeftUp, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
     zombieAttackFrame[zombieNum]++;
     zombieAttackDisplacement[zombieNum] = 0;
     zombieHpBarX[zombieNum] = zombieX[zombieNum] - 55;
@@ -645,7 +664,7 @@ void zombieAttackLeft(int zombieNum) {
   } else if (zombieAttackFrame[zombieNum] > ZOMBIE_ATTACK_END_FRAME) {
     zombieAttackFrame[zombieNum] = -1;
     zombieState[zombieNum] = 1;
-    image(zombieLeftUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+    image(zombieLeftUp, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
     
   }
   
@@ -663,12 +682,12 @@ void zombieAttackRight(int zombieNum) {
     //if the attack hasn't started
     if (zombieAttackFrame[zombieNum] < 0) {
       zombieAttackFrame[zombieNum] = 0;
-      image(zombieRightAttack, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+      image(zombieRightAttack, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       zombieAttackFrame[zombieNum]++;
       
     //wind up attack
     } else if (zombieAttackFrame[zombieNum] >= 0 && zombieAttackFrame[zombieNum] < ZOMBIE_JUMP_FRAME) {
-      image(zombieRightAttack, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+      image(zombieRightAttack, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       zombieAttackFrame[zombieNum]++;
       zombieHpBarX[zombieNum] = zombieX[zombieNum] - 55;
 			
@@ -676,7 +695,7 @@ void zombieAttackRight(int zombieNum) {
     } else if (zombieAttackFrame[zombieNum] == ZOMBIE_JUMP_FRAME) { 
       zombieX[zombieNum] += ZOMBIE_JUMP_SPEED;
       zombieAttackDisplacement[zombieNum] += ZOMBIE_JUMP_SPEED;
-      image(zombieRightUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+      image(zombieRightUp, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       zombieHpBarX[zombieNum] = zombieX[zombieNum] - 10;
 			
 			//check if zombie is near character (should do damage)
@@ -696,7 +715,7 @@ void zombieAttackRight(int zombieNum) {
       
   	//stand still - frame counting restarts and displacement counting stops
     } else if (zombieAttackFrame[zombieNum] > ZOMBIE_JUMP_FRAME && zombieAttackFrame[zombieNum] <= ZOMBIE_ATTACK_END_FRAME) { 
-      image(zombieRightUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+      image(zombieRightUp, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       zombieAttackFrame[zombieNum]++;
       zombieAttackDisplacement[zombieNum] = 0;
       zombieHpBarX[zombieNum] = zombieX[zombieNum] - 10;
@@ -705,7 +724,7 @@ void zombieAttackRight(int zombieNum) {
     } else if (zombieAttackFrame[zombieNum] > ZOMBIE_ATTACK_END_FRAME) {
       zombieAttackFrame[zombieNum] = -1;
       zombieState[zombieNum] = 3;
-      image(zombieRightUp, zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+      image(zombieRightUp, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       
     }
 
