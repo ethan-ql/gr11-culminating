@@ -496,8 +496,29 @@ void draw() {
 
 
 
+/**
+* checks if the mouse is clicked (used to attack)
+* pre: none
+* post: attacking = true (if cooldown is finished and attack animation is still going)
+*/
+void mousePressed() {
+  if (attackFrame >= 0 && attackCooldown == 0) {
+    attacking = true;  
+  }
+}
 
-
+/**
+* checks if the mouse is clicked (used to release attack)
+* pre: none
+* post: attacking = false, attackFrame = 0, all zombieAttacked = false
+*/
+void mouseReleased() {
+  attacking = false;
+  attackFrame = 0;
+  for (int i = 0; i < MAX_ZOMBIES; i++) {
+    zombieAttacked[i] = false; 
+  }
+}
 
 
 
