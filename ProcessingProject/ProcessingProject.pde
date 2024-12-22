@@ -21,6 +21,8 @@ final int MAX_ZOMBIES = 20; //arbitrary, set relatively small to save memory
 final int ZOMBIE_Y = 440; //zombies can't jump or move up so their y is a constant
 final int ZOMBIE_SPAWN_FREQUENCY = 300; //frames between zombie spawing
 double zombieSpawnDistance = 0; //distance the zombie spawns from a side of the screen, will change every time a zombie spawns
+int closestZombie = -1;
+double closestZombieX = -1;
 
 //zombie array attributes: stored in an array because these attributes can be different for each zombie
 
@@ -98,6 +100,7 @@ boolean attacking = false;
 boolean attackFinished = true;
 int attackFrame; //used to count how far in the attack animation the character is
 int attackCooldown = 0; //number of frames left before character can attack again
+boolean splashAttack = true; //if true, the character can hit multiple zombies with one attack
 
 
 
@@ -149,12 +152,17 @@ void setup() {
   zombieRightDown = loadImage("zombieRightDown.png");
   zombieRightAttack = loadImage("zombieRightAttack.png");
   
+  
   //initialize all zombie states as 0 (not existing), attack displacements at 0 and attack frames as -1 (not attacking)
   for (int i = 0; i < MAX_ZOMBIES; i++) {
     zombieState[i] = 0;
     zombieAttackFrame[i] = -1;
     zombieAttackDisplacement[i] = 0;
   }
+  
+  spawnZombie();
+  spawnZombie();
+  spawnZombie();
 }
 
 
@@ -193,13 +201,13 @@ void draw() {
   stroke(90, 40, 30);
   fill(90, 40, 30);
   rect(900, 350, 200, 5);
-  
+  /*
   //SPAWNING ZOMBIES
   //call spawnZombie method for every set number of frames
   if (frameCount % ZOMBIE_SPAWN_FREQUENCY == 0) {
     spawnZombie();
     spawnZombie();
-  }
+  }*/
   
   //CHARACTER MOVEMENT:
   //check if character is on screen and which direction it should move, move it accordingly
@@ -343,39 +351,86 @@ void draw() {
     
     attackFrame++;
     
-    for (int i = 0; i < MAX_ZOMBIES; i++) {
+    closestZombieX = -1000;
+    closestZombie = -1;
+    
+
+    for (int i = 0; i < MAX_ZOMBIES; i++) { //<>//
+      
+      
+      //if the zombie is in attack range
       if (characterY > 350 && ((facingRight && zombieX[i] - characterX < 100 && zombieX[i] - characterX > -20) || (!facingRight && characterX - zombieX[i] < 100 && characterX - zombieX[i] > -20)) && !zombieAttacked[i]) { 
-        zombieHp[i] -= characterDamage;
-        zombieAttacked[i] = true;
         
+        if (splashAttack) {
+          //damage the zombie and state that it has already been damaged in this attack animation
+          zombieHp[i] -= characterDamage;
+          zombieAttacked[i] = true;
+          println("just did damage");
+          
+          //knock the zombies back in the correct direction
+          if (facingRight) {
+            zombieX[i] += CHARACTER_KNOCKBACK;
+          } else {
+            zombieX[i] -= CHARACTER_KNOCKBACK;
+          }
         
-        if (facingRight) {
-          zombieX[i] += CHARACTER_KNOCKBACK;
-        } else {
-          zombieX[i] -= CHARACTER_KNOCKBACK;
+        //set closestZombie variable to zombieNum with smallest zombieX
+        } else if (!splashAttack && Math.abs(closestZombieX - characterX) > Math.abs(zombieX[i] - characterX)) {
+          closestZombieX = zombieX[i];
+          closestZombie = i;
         }
       }
+      
+      
+      
       if (zombieHp[i] <= 0) {
         zombieState[i] = 0;
         zombieAttackFrame[i] = 0;
       }
-    }
-    
-    
+
       
-    
+      
+    }
+
+    if (closestZombie != -1) { //this for loop needs to be put first otherwise it will index -1 which is out of bounds
+      if (!splashAttack && !zombieAttacked[closestZombie]) {
+        //damage the zombie and state that it has already been damaged in this attack animation
+        zombieHp[closestZombie] -= characterDamage;
+        println("just did damage");
+        
+        //knock the zombies back in the correct direction
+        if (facingRight) {
+          zombieX[closestZombie] += CHARACTER_KNOCKBACK;
+        } else {
+          zombieX[closestZombie] -= CHARACTER_KNOCKBACK;
+        }
+        
+        //only one zombie can be attacked when splashAttack is off, so this loop sets all zombie to having been attacked to ensure that none can be attacked again
+        for (int i = 0; i < MAX_ZOMBIES; i++) {
+          zombieAttacked[i] = true;
+        }
+        
+      }  
+    }
+  
     if (attackFrame > 20) {
       attacking = false;
       attackFrame = -1;
       for (int i = 0; i < MAX_ZOMBIES; i++) {
         zombieAttacked[i] = false; 
       }
+      println();
     }
+    
+    
+    
   }
+  
   
   if (attackCooldown > 0) {
     attackCooldown--;
   }
+  
   
   
   
@@ -458,10 +513,13 @@ void draw() {
   rect(0, 500, 1400, 200);
   fill(60, 60, 60);
   rect(0, 500, 1400, 20);
+  
+  //fill the screen with transparent red if the character is being damaged
   for (int i = 0; i < MAX_ZOMBIES; i++) {
     if (zombieDamaging[i]) {
       fill(255, 0, 0, 50);
       rect(0, 0, 1400, 700);
+      zombieDamaging[i] = false;
     }
   }
   
@@ -575,6 +633,7 @@ void keyReleased() {
     for (int i = 0; i < MAX_ZOMBIES; i++) {
       zombieAttacked[i] = false; 
     }
+    println();
   }
   
 }
