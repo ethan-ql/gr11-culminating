@@ -12,56 +12,56 @@
 
 //GLOBAL VARIABLES: CAN BE USED IN ANY METHOD
 
-//zombie attributes:
-double zombieSpeed = 1.2; //pixels moved per frame, will be changed to increase difficulty
-int zombieDamage = 10; //% of character health per hit
-final double ZOMBIE_JUMP_SPEED = 16 * zombieSpeed; //pixels moved per frame
-final double ZOMBIE_KNOCKBACK = 10 * zombieSpeed; //pixels character moves per frame being hit by zombie
+//ZOMBIES:
+
+//monster characteristics
 final int MAX_ZOMBIES = 20; //arbitrary, set relatively small to save memory
-final int ZOMBIE_Y = 440; //zombies can't jump or move up so their y is a constant
 final int ZOMBIE_SPAWN_FREQUENCY = 300; //frames between zombie spawing
+final int ZOMBIE_Y = 440; //zombies can't jump or move up so their y is a constant
+
+//speeds
+double zombieSpeed = 1.2; //pixels moved per frame, will be changed to increase difficulty
+final double ZOMBIE_JUMP_SPEED = 16 * zombieSpeed; //pixels moved per frame
+
+//attack characteristics
+final double ZOMBIE_KNOCKBACK = 10 * zombieSpeed; //pixels character moves per frame being hit by zombie
+int zombieDamage = 10; //% of character health per hit
+
+//attack animation frames
+final int ZOMBIE_JUMP_FRAME = 30; //frame to jump forward
+final int ZOMBIE_ATTACK_END_FRAME = 60; //frame to end attack animation
+final int ZOMBIE_MAX_ATTACK_DISPLACEMENT = 200; //how far the zombie should travel when jumping
+
+//dynamic values
 double zombieSpawnDistance = 0; //distance the zombie spawns from a side of the screen, will change every time a zombie spawns
 int closestZombie = -1;
 double closestZombieX = -1;
+
 
 //zombie array attributes: stored in an array because these attributes can be different for each zombie
 
 //stores x pos of each zombie
 double[] zombieX = new double[MAX_ZOMBIES]; 
 
-//stores whether each zombie is in up or down pos
+//whether each zombie is in up or down position
 boolean[] zombieUp = new boolean[MAX_ZOMBIES]; 
 
-//array containing the state of each zombie as follows: 
-//0 = doesn't exist
-//1 = moving left, 2 = attacking left
-//3 = moving right, 4 = attacking right
+//attacking
+int[] zombieAttackFrame = new int[MAX_ZOMBIES];//frame of the attack animation that each zombie is on (-1 = not attacking)
+int[] zombieAttackDisplacement = new int[MAX_ZOMBIES]; //how far the zombie has travelled while attacking
+//zombieState contains the state of each zombie as follows: 
+//0 = doesn't exist, 1 = moving left, 2 = attacking left, 3 = moving right, 4 = attacking right
 int[] zombieState = new int[MAX_ZOMBIES];
+boolean[] zombieDamaging = new boolean[MAX_ZOMBIES]; //stores zombies are doing damage to character
 
-//stores hp of each zombie in percentage
-int[] zombieHp = new int[MAX_ZOMBIES];
-
-double[] zombieHpBarX = new double[MAX_ZOMBIES];
-
-//stores the frame of the attack animation that each zombie is on (-1 = not attacking)
-int[] zombieAttackFrame = new int[MAX_ZOMBIES];
-
-//stores how far the zombie has travelled while attacking
-int[] zombieAttackDisplacement = new int[MAX_ZOMBIES];
-
-//stores which zombies are doing damage to character
-boolean[] zombieDamaging = new boolean[MAX_ZOMBIES];
-
-//stores which zombies have already been attacked every character attack
-boolean[] zombieAttacked = new boolean[MAX_ZOMBIES];
-
-//zombie attack animation frames
-final int ZOMBIE_JUMP_FRAME = 30; //frame to jump forward
-final int ZOMBIE_ATTACK_END_FRAME = 60; //frame to end attack animation
-final int ZOMBIE_MAX_ATTACK_DISPLACEMENT = 200; //how far the zombie should travel when jumping
+//health and being attacked
+boolean[] zombieAttacked = new boolean[MAX_ZOMBIES]; //stores which zombies have already been attacked every character attack
+int[] zombieHp = new int[MAX_ZOMBIES]; //stores hp of each zombie in percentage of starting health
+double[] zombieHpBarX = new double[MAX_ZOMBIES]; //pos of health bar
 
 
-//character attributes:
+
+//CHARACTER:
 //character coordinates
 int characterY = 450; //start on the ground
 int characterX = 700; //start in middle of the screen
@@ -100,7 +100,7 @@ boolean attacking = false;
 boolean attackFinished = true;
 int attackFrame; //used to count how far in the attack animation the character is
 int attackCooldown = 0; //number of frames left before character can attack again
-boolean splashAttack = true; //if true, the character can hit multiple zombies with one attack
+boolean splashAttack = false; //if true, the character can hit multiple zombies with one attack
 
 
 
@@ -118,9 +118,11 @@ PImage knightRightDownAttack;
 PImage zombieLeftUp;
 PImage zombieLeftDown;
 PImage zombieLeftAttack;
+PImage zombieLeftJump;
 PImage zombieRightUp;
 PImage zombieRightDown;
 PImage zombieRightAttack;
+PImage zombieRightJump;
 
 
 
@@ -148,9 +150,11 @@ void setup() {
   zombieLeftUp = loadImage("zombieLeftUp.png");
   zombieLeftDown = loadImage("zombieLeftDown.png");
   zombieLeftAttack = loadImage("zombieLeftAttack.png");
+  zombieLeftJump = loadImage("zombieLeftJump.png");
   zombieRightUp = loadImage("zombieRightUp.png");
   zombieRightDown = loadImage("zombieRightDown.png");
   zombieRightAttack = loadImage("zombieRightAttack.png");
+  zombieRightJump = loadImage("zombieRightJump.png");
   
   
   //initialize all zombie states as 0 (not existing), attack displacements at 0 and attack frames as -1 (not attacking)
@@ -708,7 +712,7 @@ void zombieAttackLeft(int zombieNum) {
   } else if (zombieAttackFrame[zombieNum] == ZOMBIE_JUMP_FRAME) { 
     zombieX[zombieNum] -= ZOMBIE_JUMP_SPEED;
     zombieAttackDisplacement[zombieNum] += ZOMBIE_JUMP_SPEED;
-    image(zombieLeftUp, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+    image(zombieLeftJump, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
     zombieHpBarX[zombieNum] = zombieX[zombieNum] - 55;
 		
 		//check if zombie was near character (should do damage)
@@ -768,7 +772,7 @@ void zombieAttackRight(int zombieNum) {
     } else if (zombieAttackFrame[zombieNum] == ZOMBIE_JUMP_FRAME) { 
       zombieX[zombieNum] += ZOMBIE_JUMP_SPEED;
       zombieAttackDisplacement[zombieNum] += ZOMBIE_JUMP_SPEED;
-      image(zombieRightUp, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
+      image(zombieRightJump, (float) zombieX[zombieNum], ZOMBIE_Y, 130, 130);
       zombieHpBarX[zombieNum] = zombieX[zombieNum] - 10;
 			
 			//check if zombie is near character (should do damage)
