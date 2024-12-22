@@ -124,6 +124,8 @@ PImage zombieRightDown;
 PImage zombieRightAttack;
 PImage zombieRightJump;
 
+//declare fonts:
+PFont titleFont;
 
 
 
@@ -135,6 +137,8 @@ PImage zombieRightJump;
 void setup() {
   //set size of canvas: 1400px wide, 700px tall
   size(1400, 700);
+  
+  
   
   //load knight images
   knightLeftUp = loadImage("knightLeftUp.png");
@@ -156,6 +160,9 @@ void setup() {
   zombieRightAttack = loadImage("zombieRightAttack.png");
   zombieRightJump = loadImage("zombieRightJump.png");
   
+  //load fonts
+  titleFont = createFont("tiny5", 150);
+  
   
   //initialize all zombie states as 0 (not existing), attack displacements at 0 and attack frames as -1 (not attacking)
   for (int i = 0; i < MAX_ZOMBIES; i++) {
@@ -164,9 +171,7 @@ void setup() {
     zombieAttackDisplacement[i] = 0;
   }
   
-  spawnZombie();
-  spawnZombie();
-  spawnZombie();
+  
 }
 
 
@@ -187,6 +192,11 @@ void setup() {
 * post: character, landscape, zombies, background, and platforms drawn
 */
 void draw() {
+  
+  
+  
+  PFont.list();
+  
   //set background colour
   background(30, 10, 50);
   
@@ -205,13 +215,13 @@ void draw() {
   stroke(90, 40, 30);
   fill(90, 40, 30);
   rect(900, 350, 200, 5);
-  /*
+  
   //SPAWNING ZOMBIES
   //call spawnZombie method for every set number of frames
   if (frameCount % ZOMBIE_SPAWN_FREQUENCY == 0) {
     spawnZombie();
     spawnZombie();
-  }*/
+  }
   
   //CHARACTER MOVEMENT:
   //check if character is on screen and which direction it should move, move it accordingly
@@ -521,6 +531,12 @@ void draw() {
     }
   }
   
+  
+  //check if character is dead
+  if (characterHp <= 0) {
+    gameOver();
+  }
+  
   //printAllValues();
   /*
   print("Hp: \t\t");
@@ -634,6 +650,18 @@ void keyReleased() {
   }
   
 }
+
+
+
+
+void gameOver() {
+  textFont(titleFont);
+  fill(255, 0, 0);
+  textAlign(CENTER);
+  text("GAME OVER", 700, 300);
+  noLoop();
+}
+
 
 
 /**
