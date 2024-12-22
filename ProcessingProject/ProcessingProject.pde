@@ -365,7 +365,6 @@ void draw() {
           //damage the zombie and state that it has already been damaged in this attack animation
           zombieHp[i] -= characterDamage;
           zombieAttacked[i] = true;
-          println("just did damage");
           
           //knock the zombies back in the correct direction
           if (facingRight) {
@@ -396,7 +395,6 @@ void draw() {
       if (!splashAttack && !zombieAttacked[closestZombie]) {
         //damage the zombie and state that it has already been damaged in this attack animation
         zombieHp[closestZombie] -= characterDamage;
-        println("just did damage");
         
         //knock the zombies back in the correct direction
         if (facingRight) {
@@ -416,10 +414,6 @@ void draw() {
     if (attackFrame > 20) {
       attacking = false;
       attackFrame = -1;
-      for (int i = 0; i < MAX_ZOMBIES; i++) {
-        zombieAttacked[i] = false; 
-      }
-      println();
     }
     
     
@@ -633,7 +627,6 @@ void keyReleased() {
     for (int i = 0; i < MAX_ZOMBIES; i++) {
       zombieAttacked[i] = false; 
     }
-    println();
   }
   
 }
