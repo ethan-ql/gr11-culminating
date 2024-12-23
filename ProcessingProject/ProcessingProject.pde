@@ -24,6 +24,7 @@ double zombieSpeed = 1.2; //pixels moved per frame, will be changed to increase 
 final double ZOMBIE_JUMP_SPEED = 16 * zombieSpeed; //pixels moved per frame
 
 //attack characteristics
+final int ZOMBIE_SIGHT_RANGE = 200; //distance from character that the zombie starts attacking at
 final double ZOMBIE_KNOCKBACK = 10 * zombieSpeed; //pixels character moves per frame being hit by zombie
 int zombieDamage = 10; //% of character health per hit
 
@@ -103,7 +104,7 @@ int attackCooldown = 0; //number of frames left before character can attack agai
 boolean splashAttack = false; //if true, the character can hit multiple zombies with one attack
 
 
-
+//FONTS AND IMAGES NEED TO BE DECLARED GLOBALLY AND INITALIZED IN SETUP
 //declare knight images:
 PImage knightLeftUp;
 PImage knightLeftUpAttack;
@@ -125,7 +126,7 @@ PImage zombieRightAttack;
 PImage zombieRightJump;
 
 //declare fonts:
-PFont tiny5;
+PFont mainFont;
 
 
 
@@ -161,8 +162,8 @@ void setup() {
   zombieRightJump = loadImage("zombieRightJump.png");
   
   //load and set font to tiny5
-  tiny5 = createFont("tiny5", 150);
-  
+  mainFont = createFont("Tiny5-Regular.ttf", 150);
+
   
   //initialize all zombie states as 0 (not existing), attack displacements at 0 and attack frames as -1 (not attacking)
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
@@ -240,16 +241,16 @@ void draw() {
       
       rectMode(CENTER);
       if (zombieState[zombieIndex] != 2 && zombieState[zombieIndex] != 4) {
-        if (characterX - zombieX[zombieIndex] >= 150) { // moving right
+        if (characterX - zombieX[zombieIndex] >= ZOMBIE_SIGHT_RANGE) { // moving right
           zombieState[zombieIndex] = 3;
           
-        } else if (zombieX[zombieIndex] - characterX >=  150) { //moving left
+        } else if (zombieX[zombieIndex] - characterX >=  ZOMBIE_SIGHT_RANGE) { //moving left
           zombieState[zombieIndex] = 1;
           
-        } else if (characterX - zombieX[zombieIndex] >= 0 && characterX - zombieX[zombieIndex] < 150 ) { //moving right attacking
+        } else if (characterX - zombieX[zombieIndex] >= 0 && characterX - zombieX[zombieIndex] < ZOMBIE_SIGHT_RANGE ) { //moving right attacking
           zombieState[zombieIndex] = 4;
           
-        } else if (zombieX[zombieIndex] - characterX >= 0 && zombieX[zombieIndex] - characterX < 150) { //moving left attacking
+        } else if (zombieX[zombieIndex] - characterX >= 0 && zombieX[zombieIndex] - characterX < ZOMBIE_SIGHT_RANGE) { //moving left attacking
           zombieState[zombieIndex] = 2;
         }
       }
@@ -455,7 +456,7 @@ void draw() {
   rect(50, 60, 300, 60);
   
   //label
-  textFont(tiny5, 40);
+  textFont(mainFont, 40);
   fill(255, 255, 255);
   textAlign(LEFT, TOP);
   text("CHARACTER HP", 50, 20);
@@ -476,7 +477,7 @@ void draw() {
   strokeWeight(0);
   
   //label
-  textFont(tiny5, 40);
+  textFont(mainFont, 40);
   fill(255, 255, 255);
   textAlign(RIGHT, TOP);
   text("ATTACK CD", 1350, 20);
@@ -657,7 +658,7 @@ void keyReleased() {
 
 
 void gameOver() {
-  textFont(tiny5, 150);
+  textFont(mainFont, 150);
   fill(255, 0, 0);
   textAlign(CENTER);
   text("GAME OVER", 700, 300);
