@@ -160,7 +160,7 @@ void setup() {
   zombieRightAttack = loadImage("zombieRightAttack.png");
   zombieRightJump = loadImage("zombieRightJump.png");
   
-  //load fonts
+  //load and set font to tiny5
   tiny5 = createFont("tiny5", 150);
   
   
@@ -440,27 +440,45 @@ void draw() {
   
   
   //Character health bar:
+  //inside
   rectMode(CORNER);
   noStroke();
   fill(255, 20, 20);
-  rect(50, 50, characterHp * 3, 60);
+  rect(50, 60, characterHp * 3, 60);
   
+  //outside
   stroke(200, 200, 200);
   strokeWeight(12);
   noFill();
-  rect(50, 50, 300, 60);
+  rect(50, 60, 300, 60);
+  
+  //label
+  textFont(tiny5, 40);
+  fill(255, 255, 255);
+  textAlign(LEFT, TOP);
+  text("CHARACTER HP", 50, 20);
+  
   
   //Character attack cooldown bar:
+  //inside
   rectMode(CORNER);
   noStroke();
   fill(20, 20, 255);
-  rect(1150, 50, 200 - attackCooldown * 10, 60);
+  rect(1150, 60, 200 - attackCooldown * 10, 60);
   
+  //outside
   stroke(200, 200, 200);
   strokeWeight(12);
   noFill();
-  rect(1150, 50, 200, 60);
+  rect(1150, 60, 200, 60);
   strokeWeight(0);
+  
+  //label
+  textFont(tiny5, 40);
+  fill(255, 255, 255);
+  textAlign(RIGHT, TOP);
+  text("ATTACK COOLDOWN", 1350, 20);
+  
   
   //ensure character stays on screen
   if (characterX > 1400) {
@@ -635,7 +653,7 @@ void keyReleased() {
 
 
 void gameOver() {
-  textFont(tiny5);
+  textFont(tiny5, 150);
   fill(255, 0, 0);
   textAlign(CENTER);
   text("GAME OVER", 700, 300);
