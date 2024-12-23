@@ -423,6 +423,7 @@ void draw() {
       }  
     }
   
+    //end character attack if it has been going for 20 frames
     if (attackFrame > 20) {
       attacking = false;
       attackFrame = -1;
@@ -432,13 +433,13 @@ void draw() {
     
   }
   
-  
+  //progress attackCooldown
   if (attackCooldown > 0) {
     attackCooldown--;
   }
   
   
-  
+  //DRAW VALUE BARS AT TOP OF SCREEN
   
   //Character health bar:
   //inside
@@ -465,30 +466,32 @@ void draw() {
   rectMode(CORNER);
   noStroke();
   fill(20, 20, 255);
-  rect(1150, 60, 200 - attackCooldown * 10, 60);
+  rect(1050, 60, 300 - attackCooldown * 15, 60);
   
   //outside
   stroke(200, 200, 200);
   strokeWeight(12);
   noFill();
-  rect(1150, 60, 200, 60);
+  rect(1050, 60, 300, 60);
   strokeWeight(0);
   
   //label
   textFont(tiny5, 40);
   fill(255, 255, 255);
   textAlign(RIGHT, TOP);
-  text("ATTACK COOLDOWN", 1350, 20);
+  text("ATTACK CD", 1350, 20);
   
   
-  //ensure character stays on screen
+  //ENSURE CHARACTER STAYS ON SCREEN
   if (characterX > 1400) {
     characterX = 1400;
   } else if (characterX < 0) {
     characterX = 0;
   }
   
-  //SHOW CHARACTER:
+  
+  
+  //DRAW CHARACTER:
   imageMode(CENTER);
   
   //facing left, not attacking
@@ -531,14 +534,14 @@ void draw() {
   
 
   
-  //draw the ground
+  //DRAW GROUND
   stroke(100, 100, 100);
   fill(100, 100, 100);
   rect(0, 500, 1400, 200);
   fill(60, 60, 60);
   rect(0, 500, 1400, 20);
   
-  //fill the screen with transparent red if the character is being damaged
+  //DRAW TRANSPARENT RED ON SCREEN WHEN CHARACTER IS DAMAGED
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
     if (zombieDamaging[zombieIndex]) {
       fill(255, 0, 0, 50);
@@ -547,7 +550,7 @@ void draw() {
   }
   
   
-  //check if character is dead
+  //CHECK FOR CHARACTER DEATH
   if (characterHp <= 0) {
     gameOver();
   }
