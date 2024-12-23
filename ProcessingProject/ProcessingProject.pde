@@ -125,7 +125,7 @@ PImage zombieRightAttack;
 PImage zombieRightJump;
 
 //declare fonts:
-PFont titleFont;
+PFont tiny5;
 
 
 
@@ -161,17 +161,16 @@ void setup() {
   zombieRightJump = loadImage("zombieRightJump.png");
   
   //load fonts
-  titleFont = createFont("tiny5", 150);
+  tiny5 = createFont("tiny5", 150);
   
   
   //initialize all zombie states as 0 (not existing), attack displacements at 0 and attack frames as -1 (not attacking)
-  for (int i = 0; i < MAX_ZOMBIES; i++) {
-    zombieState[i] = 0;
-    zombieAttackFrame[i] = -1;
-    zombieAttackDisplacement[i] = 0;
+  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+    zombieState[zombieIndex] = 0;
+    zombieAttackFrame[zombieIndex] = -1;
+    zombieAttackDisplacement[zombieIndex] = 0;
   }
   
-  spawnZombie();
   
 }
 
@@ -215,13 +214,13 @@ void draw() {
   stroke(90, 40, 30);
   fill(90, 40, 30);
   rect(900, 350, 200, 5);
-  /*
+  
   //SPAWNING ZOMBIES
   //call spawnZombie method for every set number of frames
   if (frameCount % ZOMBIE_SPAWN_FREQUENCY == 0) {
     spawnZombie();
     spawnZombie();
-  }*/
+  }
   
   //CHARACTER MOVEMENT:
   //check if character is on screen and which direction it should move, move it accordingly
@@ -233,56 +232,56 @@ void draw() {
   }
   
   //PARSE THROUGH ZOMBIE ARRAYS
-  for (int i = 0; i < MAX_ZOMBIES; i++) {
-    if (zombieState[i] >= 1 && zombieState[i] <=6 ) {
+  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+    if (zombieState[zombieIndex] >= 1 && zombieState[zombieIndex] <=6 ) {
       if (frameCount % 11 == 0) {
-        zombieUp[i] = !zombieUp[i];
+        zombieUp[zombieIndex] = !zombieUp[zombieIndex];
       }
       
       rectMode(CENTER);
-      if (zombieState[i] != 2 && zombieState[i] != 4) {
-        if (characterX - zombieX[i] >= 150) { // moving right
-          zombieState[i] = 3;
+      if (zombieState[zombieIndex] != 2 && zombieState[zombieIndex] != 4) {
+        if (characterX - zombieX[zombieIndex] >= 150) { // moving right
+          zombieState[zombieIndex] = 3;
           
-        } else if (zombieX[i] - characterX >=  150) { //moving left
-          zombieState[i] = 1;
+        } else if (zombieX[zombieIndex] - characterX >=  150) { //moving left
+          zombieState[zombieIndex] = 1;
           
-        } else if (characterX - zombieX[i] >= 0 && characterX - zombieX[i] < 150 ) { //moving right attacking
-          zombieState[i] = 4;
+        } else if (characterX - zombieX[zombieIndex] >= 0 && characterX - zombieX[zombieIndex] < 150 ) { //moving right attacking
+          zombieState[zombieIndex] = 4;
           
-        } else if (zombieX[i] - characterX >= 0 && zombieX[i] - characterX < 150) { //moving left attacking
-          zombieState[i] = 2;
+        } else if (zombieX[zombieIndex] - characterX >= 0 && zombieX[zombieIndex] - characterX < 150) { //moving left attacking
+          zombieState[zombieIndex] = 2;
         }
       }
       
-      switch (zombieState[i]) {
+      switch (zombieState[zombieIndex]) {
         
         case 1: //moving left
-          zombieX[i] -= zombieSpeed;
-          if (zombieUp[i]) { //up position
-            image(zombieLeftUp, (float) zombieX[i], ZOMBIE_Y, 130, 130);
+          zombieX[zombieIndex] -= zombieSpeed;
+          if (zombieUp[zombieIndex]) { //up position
+            image(zombieLeftUp, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
           } else { //down position
-            image(zombieLeftDown, (float) zombieX[i], ZOMBIE_Y, 130, 130);
+            image(zombieLeftDown, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
           }
-          zombieHpBarX[i] = zombieX[i] - (55);
+          zombieHpBarX[zombieIndex] = zombieX[zombieIndex] - (55);
           break;
         
         case 2:
-          zombieAttackLeft(i);
+          zombieAttackLeft(zombieIndex);
           break;
           
         case 3: //moving right
-          zombieX[i] += zombieSpeed;
-          if (zombieUp[i]) { //up position
-            image(zombieRightUp, (float) zombieX[i], ZOMBIE_Y, 130, 130);
+          zombieX[zombieIndex] += zombieSpeed;
+          if (zombieUp[zombieIndex]) { //up position
+            image(zombieRightUp, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
           } else { //down position
-            image(zombieRightDown, (float) zombieX[i], ZOMBIE_Y, 130, 130);
+            image(zombieRightDown, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
           }
-          zombieHpBarX[i] = zombieX[i] - 10;
+          zombieHpBarX[zombieIndex] = zombieX[zombieIndex] - 10;
           break;
         
         case 4: //attacking right
-          zombieAttackRight(i);
+          zombieAttackRight(zombieIndex);
           break;
         
         
@@ -292,12 +291,12 @@ void draw() {
       rectMode(CORNER);
       noStroke();
       fill(255, 0, 0);
-      rect((int) zombieHpBarX[i], ZOMBIE_Y - 75, zombieHp[i] * 0.65, 10);
+      rect((int) zombieHpBarX[zombieIndex], ZOMBIE_Y - 75, zombieHp[zombieIndex] * 0.65, 10);
       
       stroke(200, 200, 200);
       strokeWeight(4);
       noFill();
-      rect((int) zombieHpBarX[i], ZOMBIE_Y - 75, 65, 10);
+      rect((int) zombieHpBarX[zombieIndex], ZOMBIE_Y - 75, 65, 10);
       strokeWeight(0);
       
   
@@ -367,36 +366,36 @@ void draw() {
     closestZombie = -1;
     
 
-    for (int i = 0; i < MAX_ZOMBIES; i++) { //<>//
+    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) { //<>//
       
       
       //if the zombie is in attack range
-      if (characterY > 350 && ((facingRight && zombieX[i] - characterX < 100 && zombieX[i] - characterX > -20) || (!facingRight && characterX - zombieX[i] < 100 && characterX - zombieX[i] > -20)) && !zombieAttacked[i]) { 
+      if (characterY > 350 && ((facingRight && zombieX[zombieIndex] - characterX < 100 && zombieX[zombieIndex] - characterX > -20) || (!facingRight && characterX - zombieX[zombieIndex] < 100 && characterX - zombieX[zombieIndex] > -20)) && !zombieAttacked[zombieIndex]) { 
         
         if (splashAttack) {
           //damage the zombie and state that it has already been damaged in this attack animation
-          zombieHp[i] -= characterDamage;
-          zombieAttacked[i] = true;
+          zombieHp[zombieIndex] -= characterDamage;
+          zombieAttacked[zombieIndex] = true;
           
           //knock the zombies back in the correct direction
           if (facingRight) {
-            zombieX[i] += CHARACTER_KNOCKBACK;
+            zombieX[zombieIndex] += CHARACTER_KNOCKBACK;
           } else {
-            zombieX[i] -= CHARACTER_KNOCKBACK;
+            zombieX[zombieIndex] -= CHARACTER_KNOCKBACK;
           }
         
         //set closestZombie variable to zombieNum with smallest zombieX
-        } else if (!splashAttack && Math.abs(closestZombieX - characterX) > Math.abs(zombieX[i] - characterX)) {
-          closestZombieX = zombieX[i];
-          closestZombie = i;
+        } else if (!splashAttack && Math.abs(closestZombieX - characterX) > Math.abs(zombieX[zombieIndex] - characterX)) {
+          closestZombieX = zombieX[zombieIndex];
+          closestZombie = zombieIndex;
         }
       }
       
       
       
-      if (zombieHp[i] <= 0) {
-        zombieState[i] = 0;
-        zombieAttackFrame[i] = 0;
+      if (zombieHp[zombieIndex] <= 0) {
+        zombieState[zombieIndex] = 0;
+        zombieAttackFrame[zombieIndex] = 0;
       }
 
       
@@ -416,8 +415,8 @@ void draw() {
         }
         
         //only one zombie can be attacked when splashAttack is off, so this loop sets all zombie to having been attacked to ensure that none can be attacked again
-        for (int i = 0; i < MAX_ZOMBIES; i++) {
-          zombieAttacked[i] = true;
+        for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+          zombieAttacked[zombieIndex] = true;
         }
         
       }  
@@ -521,8 +520,8 @@ void draw() {
   rect(0, 500, 1400, 20);
   
   //fill the screen with transparent red if the character is being damaged
-  for (int i = 0; i < MAX_ZOMBIES; i++) {
-    if (zombieDamaging[i]) {
+  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+    if (zombieDamaging[zombieIndex]) {
       fill(255, 0, 0, 50);
       rect(0, 0, 1400, 700);
     }
@@ -568,8 +567,8 @@ void mousePressed() {
 void mouseReleased() {
   attacking = false;
   attackFrame = 0;
-  for (int i = 0; i < MAX_ZOMBIES; i++) {
-    zombieAttacked[i] = false; 
+  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+    zombieAttacked[zombieIndex] = false; 
   }
 }
 
@@ -625,8 +624,8 @@ void keyReleased() {
   if (key == 'j') {
     attacking = false;
     attackFrame = 0;
-    for (int i = 0; i < MAX_ZOMBIES; i++) {
-      zombieAttacked[i] = false; 
+    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+      zombieAttacked[zombieIndex] = false; 
     }
   }
   
@@ -636,7 +635,7 @@ void keyReleased() {
 
 
 void gameOver() {
-  textFont(titleFont);
+  textFont(tiny5);
   fill(255, 0, 0);
   textAlign(CENTER);
   text("GAME OVER", 700, 300);
@@ -665,20 +664,20 @@ boolean onLevel2() {
 void spawnZombie() {
   
   //use for loop to find first empty slot in array
-  for (int i = 0; i < MAX_ZOMBIES; i++) {
-    if (zombieState[i] == 0) {
+  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+    if (zombieState[zombieIndex] == 0) {
       
-      zombieUp[i] = true;
-      zombieHp[i] = 100;
+      zombieUp[zombieIndex] = true;
+      zombieHp[zombieIndex] = 100;
       
       //randomly decide whether to spawn on left or right side
       if (Math.random() < 0.5) { //left side       
-        zombieX[i] =  -65 - zombieSpawnDistance;
-        zombieState[i] = 3;
+        zombieX[zombieIndex] =  -65 - zombieSpawnDistance;
+        zombieState[zombieIndex] = 3;
         
       } else { //right side
-        zombieX[i] = 1465 + zombieSpawnDistance;
-        zombieState[i] = 1;
+        zombieX[zombieIndex] = 1465 + zombieSpawnDistance;
+        zombieState[zombieIndex] = 1;
       }
       
       
