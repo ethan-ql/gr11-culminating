@@ -353,7 +353,7 @@ void draw() {
   } 
   
   
-  //if character is attacking
+  //CHARACTER ATTACK
   if (attacking) {
     
     if (attackFrame == 0) {
@@ -396,6 +396,7 @@ void draw() {
       if (zombieHp[zombieIndex] <= 0) {
         zombieState[zombieIndex] = 0;
         zombieAttackFrame[zombieIndex] = 0;
+        zombieDamaging[zombieIndex] = false;
       }
 
       
