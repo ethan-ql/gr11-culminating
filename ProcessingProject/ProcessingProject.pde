@@ -18,13 +18,14 @@
 final int MAX_ZOMBIES = 20; //arbitrary, set relatively small to save memory
 final int ZOMBIE_SPAWN_FREQUENCY = 300; //frames between zombie spawing
 final int ZOMBIE_Y = 440; //zombies can't jump or move up so their y is a constant
+int zombieMaxHp = 100; //100%
 
 //speeds
 double zombieSpeed = 1.2; //pixels moved per frame, will be changed to increase difficulty
 final double ZOMBIE_JUMP_SPEED = 16 * zombieSpeed; //pixels moved per frame
 
 //attack characteristics
-final int ZOMBIE_SIGHT_RANGE = 200; //distance from character that the zombie starts attacking at
+final int ZOMBIE_SIGHT_RANGE = 180; //distance from character that the zombie starts attacking at
 final double ZOMBIE_KNOCKBACK = 10 * zombieSpeed; //pixels character moves per frame being hit by zombie
 int zombieDamage = 10; //% of character health per hit
 
@@ -73,6 +74,7 @@ boolean facingRight = true;
 boolean characterUp = true;
 
 //full characterHp
+int maxCharacterHp = 100; //will be changed using upgrades
 int characterHp = 100; //100%
 
 final double CHARACTER_SPEED = 7; //pixels moved per frame
@@ -102,6 +104,15 @@ boolean attackFinished = true;
 int attackFrame; //used to count how far in the attack animation the character is
 int attackCooldown = 0; //number of frames left before character can attack again
 boolean splashAttack = false; //if true, the character can hit multiple zombies with one attack
+
+
+//USER & WAVE DATA:
+int zombiesKilled = 0;
+int zombiesSpawned = 0;
+int zombiesPerSpawn = 1;
+int zombiesPerWave = 10;
+int wave = 1;
+int score = 0;
 
 
 //FONTS AND IMAGES NEED TO BE DECLARED GLOBALLY AND INITALIZED IN SETUP
@@ -165,11 +176,12 @@ void setup() {
   mainFont = createFont("Tiny5-Regular.ttf", 150);
 
   
-  //initialize all zombie states as 0 (not existing), attack displacements at 0 and attack frames as -1 (not attacking)
+  //initialize all zombie states as 0 (not existing), attack displacements at 0, attack frames as -1 (not attacking), zombieHp as 100
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
     zombieState[zombieIndex] = 0;
     zombieAttackFrame[zombieIndex] = -1;
     zombieAttackDisplacement[zombieIndex] = 0;
+    zombieHp[zombieIndex] = zombieMaxHp;
   }
   
   
@@ -219,21 +231,23 @@ void draw() {
   //SPAWNING ZOMBIES
   //call spawnZombie method for every set number of frames
   if (frameCount % ZOMBIE_SPAWN_FREQUENCY == 0) {
-    spawnZombie();
-    spawnZombie();
+    
+    //spawn correct amount of zombies
+    for (int i = 0; i < zombiesPerSpawn; i++) { 
+      if (zombiesSpawned < zombiesPerWave) { //put this check inside the for loop to not print extra zombies
+        spawnZombie();
+        zombiesSpawned++;
+      }
+    }
   }
   
-  //CHARACTER MOVEMENT:
-  //check if character is on screen and which direction it should move, move it accordingly
-  if (moveRight) {
-    characterX += CHARACTER_SPEED;
-  }
-  if (moveLeft) {
-    characterX -= CHARACTER_SPEED;
-  }
   
-  //PARSE THROUGH ZOMBIE ARRAYS
+  
+  //PARSE THROUGH ZOMBIE ARRAYS **FOR PRINTING**
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+    
+    checkZombieDeath(zombieIndex); //double check if zombie is dead and change its values accordingly if it is so that it is not printed
+    
     if (zombieState[zombieIndex] >= 1 && zombieState[zombieIndex] <=6 ) {
       if (frameCount % 11 == 0) {
         zombieUp[zombieIndex] = !zombieUp[zombieIndex];
@@ -292,7 +306,7 @@ void draw() {
       rectMode(CORNER);
       noStroke();
       fill(255, 0, 0);
-      rect((int) zombieHpBarX[zombieIndex], ZOMBIE_Y - 75, zombieHp[zombieIndex] * 0.65, 10);
+      rect((int) zombieHpBarX[zombieIndex], ZOMBIE_Y - 75, ((float) zombieHp[zombieIndex] / (float) zombieMaxHp) * 65, 10);
       
       stroke(200, 200, 200);
       strokeWeight(4);
@@ -306,6 +320,20 @@ void draw() {
   }
   rectMode(CORNER);
   
+  
+  //CHARACTER MOVEMENT:
+  //check if character is on screen and which direction it should move, move it accordingly
+  if (moveRight) {
+    characterX += CHARACTER_SPEED;
+  }
+  if (moveLeft) {
+    characterX -= CHARACTER_SPEED;
+  }
+  
+  //change character up and down every few frames to simulate walking motion
+  if (frameCount % 7 == 0) {
+    characterUp = !characterUp;
+  } 
 
   //if character was on level 2 & now off the platform & not already falling
   if (characterLevel == 2 && !onLevel2() && !falling) {
@@ -348,10 +376,8 @@ void draw() {
   }
   
   
-  //change character up and down every few frames to simulate walking motion
-  if (frameCount % 7 == 0) {
-    characterUp = !characterUp;
-  } 
+  
+  
   
   
   //CHARACTER ATTACK
@@ -366,8 +392,8 @@ void draw() {
     closestZombieX = -1000;
     closestZombie = -1;
     
-
-    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) { //<>//
+     //parse through zombie arrays to check if they have been hit
+     for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) { //<>//
       
       
       //if the zombie is in attack range
@@ -392,15 +418,7 @@ void draw() {
         }
       }
       
-      
-      
-      if (zombieHp[zombieIndex] <= 0) {
-        zombieState[zombieIndex] = 0;
-        zombieAttackFrame[zombieIndex] = 0;
-        zombieDamaging[zombieIndex] = false;
-      }
-
-      
+      checkZombieDeath(zombieIndex); //check if zombie is dead and change its values accordingly if it is
       
     }
 
@@ -483,6 +501,19 @@ void draw() {
   text("ATTACK CD", 1350, 20);
   
   
+  //waves label:
+  textFont(mainFont, 40);
+  fill(255, 255, 255);
+  textAlign(CENTER, TOP);
+  text("WAVE: "+wave, 700, 20);
+  
+  //score label:
+  textFont(mainFont, 40);
+  fill(255, 255, 255);
+  textAlign(CENTER, TOP);
+  text("SCORE: "+score, 700, 70);
+  
+  
   //ENSURE CHARACTER STAYS ON SCREEN
   if (characterX > 1400) {
     characterX = 1400;
@@ -555,8 +586,12 @@ void draw() {
   if (characterHp <= 0) {
     gameOver();
   }
-
   
+  
+  //CHECK IF USER HAS KILLED ALL ZOMBIES
+  if (zombiesKilled >= zombiesPerWave) {
+    nextWave();
+  }
   
 }
 
@@ -654,9 +689,30 @@ void keyReleased() {
   
 }
 
+/**
+* checks if the character is on one of the platforms
+* pre: none
+* post: wave variable is incremented, zombieDamage and zombieHp and zombieSpeed increased, zombiesKilled and zombiesSpawned reset to zero, refill characterHp to full
+*/
+void nextWave() {
+  wave++;
+  zombieDamage += 1;
+  zombieMaxHp += 10;
+  zombieSpeed += 0.05;
+  zombiesPerWave += 2;
+  if (wave % 4 == 0) { //increase zombies per spawn every 4 waves
+    zombiesPerSpawn++;
+  }
+  zombiesKilled = 0;
+  zombiesSpawned = 0;
+  characterHp = maxCharacterHp;
+}
 
-
-
+/**
+* end the game (called when character dies)
+* pre: none
+* post: game stops being drawn and "GAME OVER" text is displayed
+*/
 void gameOver() {
   textFont(mainFont, 150);
   fill(255, 0, 0);
@@ -678,6 +734,22 @@ boolean onLevel2() {
 }
 
 
+/**
+* checks if a zombie has less than or equal to zero health, if it is, changes its values to show that it is dead and changes the score and zombiesKilled accordingly
+* @param zombieIndex: index of the zombie to check
+* pre: none
+* post: if zombie health is less than zero, zombie state and other values will be changed to show that it is dead, zombiesKilled and score are incremented accordingly
+*/
+void checkZombieDeath(int zombieIndex) {
+  if (zombieHp[zombieIndex] <= 0) {
+    zombieHp[zombieIndex] = zombieMaxHp;
+    zombieState[zombieIndex] = 0;
+    zombieAttackFrame[zombieIndex] = 0;
+    zombieDamaging[zombieIndex] = false;
+    zombiesKilled++;
+    score += 50;
+  }
+}
 
 /**
 * places a zombie at a random distance (0-100 or 250-350 pixels) off of the left or right side of the screen 
@@ -691,7 +763,7 @@ void spawnZombie() {
     if (zombieState[zombieIndex] == 0) {
       
       zombieUp[zombieIndex] = true;
-      zombieHp[zombieIndex] = 100;
+      zombieHp[zombieIndex] = zombieMaxHp;
       
       //randomly decide whether to spawn on left or right side
       if (Math.random() < 0.5) { //left side       
