@@ -245,9 +245,10 @@ void draw() {
   
   //PARSE THROUGH ZOMBIE ARRAYS **FOR PRINTING**
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-    
-    checkZombieDeath(zombieIndex); //double check if zombie is dead and change its values accordingly if it is so that it is not printed
-    
+    //double check zombie death and kill accordingly to avoid accidental drawings of zombies
+    if (zombieHp[zombieIndex] <= 0) {
+      killZombie(zombieIndex); 
+    }
     if (zombieState[zombieIndex] >= 1 && zombieState[zombieIndex] <=6 ) {
       if (frameCount % 11 == 0) {
         zombieUp[zombieIndex] = !zombieUp[zombieIndex];
@@ -594,6 +595,8 @@ void draw() {
     nextWave();
   }
   
+  
+  
 }
 
 
@@ -655,6 +658,12 @@ void keyPressed() {
   if (key == ' ' && !jumping && !falling) {
     jumping = true;
     jumpFrame = 0;
+  }
+  
+  if (key == '~') {
+    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+      killZombie(zombieIndex);
+    }
   }
 }
 
