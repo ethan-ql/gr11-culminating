@@ -418,8 +418,9 @@ void draw() {
         }
       }
       
-      checkZombieDeath(zombieIndex); //check if zombie is dead and change its values accordingly if it is
-      
+      if (zombieHp[zombieIndex] <= 0) {
+        killZombie(zombieIndex); //check if zombie is dead and change its values accordingly if it is
+      }
     }
 
     if (closestZombie != -1) { //this for loop needs to be put first otherwise it will index -1 which is out of bounds
@@ -695,6 +696,9 @@ void keyReleased() {
 * post: wave variable is incremented, zombieDamage and zombieHp and zombieSpeed increased, zombiesKilled and zombiesSpawned reset to zero, refill characterHp to full
 */
 void nextWave() {
+  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+    killZombie(zombieIndex);
+  }
   wave++;
   zombieDamage += 1;
   zombieMaxHp += 10;
@@ -740,15 +744,13 @@ boolean onLevel2() {
 * pre: none
 * post: if zombie health is less than zero, zombie state and other values will be changed to show that it is dead, zombiesKilled and score are incremented accordingly
 */
-void checkZombieDeath(int zombieIndex) {
-  if (zombieHp[zombieIndex] <= 0) {
-    zombieHp[zombieIndex] = zombieMaxHp;
-    zombieState[zombieIndex] = 0;
-    zombieAttackFrame[zombieIndex] = 0;
-    zombieDamaging[zombieIndex] = false;
-    zombiesKilled++;
-    score += 50;
-  }
+void killZombie(int zombieIndex) {
+  zombieHp[zombieIndex] = zombieMaxHp;
+  zombieState[zombieIndex] = 0;
+  zombieAttackFrame[zombieIndex] = 0;
+  zombieDamaging[zombieIndex] = false;
+  zombiesKilled++;
+  score += 50;
 }
 
 /**
