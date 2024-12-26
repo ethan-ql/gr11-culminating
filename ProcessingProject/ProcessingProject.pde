@@ -234,7 +234,7 @@ void draw() {
     
     //spawn correct amount of zombies
     for (int i = 0; i < zombiesPerSpawn; i++) { 
-      if (zombiesSpawned < zombiesPerWave) { //put this check inside the for loop to not print extra zombies
+      if (zombiesSpawned < zombiesPerWave && zombiesSpawned < MAX_ZOMBIES) { //put this check inside the for loop to not print extra zombies
         spawnZombie();
         zombiesSpawned++;
       }
