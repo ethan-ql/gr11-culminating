@@ -16,7 +16,7 @@
 
 //monster characteristics
 final int MAX_ZOMBIES = 20; //arbitrary, set relatively small to save memory
-final int ZOMBIE_SPAWN_FREQUENCY = 300; //frames between zombie spawing
+int zombieSpawnFrequency = 300; //frames between zombie spawing
 final int ZOMBIE_Y = 440; //zombies can't jump or move up so their y is a constant
 int zombieMaxHp = 100; //100%
 
@@ -110,7 +110,7 @@ boolean splashAttack = false; //if true, the character can hit multiple zombies 
 int zombiesKilled = 0;
 int zombiesSpawned = 0;
 int zombiesPerSpawn = 1;
-int zombiesPerWave = 10;
+int zombiesPerWave = 3;
 int wave = 1;
 int score = 0;
 
@@ -230,7 +230,7 @@ void draw() {
   
   //SPAWNING ZOMBIES
   //call spawnZombie method for every set number of frames
-  if (frameCount % ZOMBIE_SPAWN_FREQUENCY == 0) {
+  if (frameCount % zombieSpawnFrequency == 0) {
     
     //spawn correct amount of zombies
     for (int i = 0; i < zombiesPerSpawn; i++) { 
@@ -245,9 +245,10 @@ void draw() {
   
   //PARSE THROUGH ZOMBIE ARRAYS **FOR PRINTING**
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-    //double check zombie death and kill accordingly to avoid accidental drawings of zombies
+    //check zombie death and kill accordingly
     if (zombieHp[zombieIndex] <= 0) {
       killZombie(zombieIndex); 
+      score += 50;
     }
     if (zombieState[zombieIndex] >= 1 && zombieState[zombieIndex] <=6 ) {
       if (frameCount % 11 == 0) {
@@ -419,9 +420,6 @@ void draw() {
         }
       }
       
-      if (zombieHp[zombieIndex] <= 0) {
-        killZombie(zombieIndex); //check if zombie is dead and change its values accordingly if it is
-      }
     }
 
     if (closestZombie != -1) { //this for loop needs to be put first otherwise it will index -1 which is out of bounds
@@ -482,6 +480,9 @@ void draw() {
   text("CHARACTER HP", 50, 20);
   
   
+  
+  
+  
   //Character attack cooldown bar:
   //inside
   rectMode(CORNER);
@@ -496,7 +497,7 @@ void draw() {
   rect(1050, 60, 300, 60);
   strokeWeight(0);
   
-  //label
+  //cooldown label
   textFont(mainFont, 40);
   fill(255, 255, 255);
   textAlign(RIGHT, TOP);
@@ -563,7 +564,38 @@ void draw() {
       image(knightRightDownAttack, characterX, characterY, 110, 110);
     }
     
-  } 
+  }
+  
+  rectMode(CORNER);
+  
+  //draw cooldown
+  if (facingRight) {
+    //inside
+    noStroke();
+    fill(20, 20, 255);
+    rect(characterX, characterY - 100, attackCooldown * 2, 10);
+    
+    //outside
+    stroke(200, 200, 200);
+    strokeWeight(1);
+    noFill();
+    rect(characterX, characterY - 100, 40, 10);
+    strokeWeight(0);
+    
+  } else {
+    //inside
+    noStroke();
+    fill(20, 20, 255);
+    rect(characterX, characterY - 100, attackCooldown * 2, 10);
+    
+    //outside
+    stroke(200, 200, 200);
+    strokeWeight(1);
+    noFill();
+    rect(characterX, characterY - 100, 40, 10);
+    strokeWeight(0);
+  }
+  
   
   
 
@@ -705,20 +737,23 @@ void keyReleased() {
 * post: wave variable is incremented, zombieDamage and zombieHp and zombieSpeed increased, zombiesKilled and zombiesSpawned reset to zero, refill characterHp to full
 */
 void nextWave() {
+  //kill all zombies to be sure
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
     killZombie(zombieIndex);
   }
   wave++;
   zombieDamage += 1;
-  zombieMaxHp += 10;
-  zombieSpeed += 0.05;
-  zombiesPerWave += 2;
-  if (wave % 4 == 0) { //increase zombies per spawn every 4 waves
+  zombieMaxHp += 15;
+  zombieSpeed += 0.1;
+  zombiesPerWave += 1;
+  if (wave % 4 == 0) { //increase zombies per spawn and reset spawn frequency every 4 waves
     zombiesPerSpawn++;
+    zombieSpawnFrequency = 300;
   }
   zombiesKilled = 0;
   zombiesSpawned = 0;
   characterHp = maxCharacterHp;
+  zombieSpawnFrequency -= 20;
 }
 
 /**
@@ -759,7 +794,6 @@ void killZombie(int zombieIndex) {
   zombieAttackFrame[zombieIndex] = 0;
   zombieDamaging[zombieIndex] = false;
   zombiesKilled++;
-  score += 50;
 }
 
 /**
