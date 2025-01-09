@@ -17,7 +17,7 @@
 //monster characteristics
 final int MAX_ZOMBIES = 20; //arbitrary, set relatively small to save memory
 int zombieSpawnFrequency = 300; //frames between zombie spawing
-final int ZOMBIE_Y = 440; //zombies can't jump or move up so their y is a constant
+final int ZOMBIE_Y = 570; //zombies can't jump or move up so their y is a constant
 int zombieMaxHp = 100; //100%
 
 //speeds
@@ -65,7 +65,7 @@ double[] zombieHpBarX = new double[MAX_ZOMBIES]; //pos of health bar
 
 //CHARACTER:
 //character coordinates
-int characterY = 450; //start on the ground
+int characterY = 585; //start on the ground
 int characterX = 700; //start in middle of the screen
 
 int characterDamage = 50; //% of monster health
@@ -136,6 +136,9 @@ PImage zombieRightDown;
 PImage zombieRightAttack;
 PImage zombieRightJump;
 
+//declare background image
+PImage backgroundImage;
+
 //declare fonts:
 PFont mainFont;
 
@@ -150,7 +153,7 @@ void setup() {
   //set size of canvas: 1400px wide, 700px tall
   size(1400, 700);
 
-
+  
 
   //load knight images
   knightLeftUp = loadImage("knightLeftUp.png");
@@ -171,6 +174,9 @@ void setup() {
   zombieRightDown = loadImage("zombieRightDown.png");
   zombieRightAttack = loadImage("zombieRightAttack.png");
   zombieRightJump = loadImage("zombieRightJump.png");
+
+  //load backcground image
+  backgroundImage = loadImage("castleBackground.png");
 
   //load and set font to tiny5
   mainFont = createFont("Tiny5-Regular.ttf", 150);
@@ -206,25 +212,25 @@ void draw() {
 
 
 
+  //background image
+  background(backgroundImage);
 
-  //set background colour
-  background(30, 10, 50);
 
   //draw a platform on left side
   stroke(100, 50, 40);
   fill(100, 50, 40);
-  rect(300, 350, 200, 20);
+  rect(300, 460, 200, 20);
   stroke(90, 40, 30);
   fill(90, 40, 30);
-  rect(300, 350, 200, 5);
+  rect(300, 460, 200, 5);
 
   //draw a platform right side
   stroke(100, 50, 40);
   fill(100, 50, 40);
-  rect(900, 350, 200, 20);
+  rect(900, 460, 200, 20);
   stroke(90, 40, 30);
   fill(90, 40, 30);
-  rect(900, 350, 200, 5);
+  rect(900, 460, 200, 5);
 
   //SPAWNING ZOMBIES
   //call spawnZombie method for every set number of frames
@@ -336,12 +342,12 @@ void draw() {
   //fall code
   if (falling && !jumping) {
 
-    if (characterY < 450) {
+    if (characterY < 550) {
       characterY +=  fallFrame;
       fallFrame++;
     } else {
       characterLevel = 1;
-      characterY = 450;
+      characterY = 585;
       falling = false;
       fallFrame = 0;
     }
@@ -579,13 +585,6 @@ void draw() {
 
 
 
-  //DRAW GROUND
-  stroke(100, 100, 100);
-  fill(100, 100, 100);
-  rect(0, 500, 1400, 200);
-  fill(60, 60, 60);
-  rect(0, 500, 1400, 20);
-
   //DRAW TRANSPARENT RED ON SCREEN WHEN CHARACTER IS DAMAGED
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
     if (zombieDamaging[zombieIndex]) {
@@ -751,7 +750,7 @@ void gameOver() {
  * post: none
  */
 boolean onLevel2() {
-  return ((characterY > 290 && characterY < 315) && ((characterX > 280 && characterX < 520) || (characterX > 880 && characterX < 1120)));
+  return ((characterY > 480 && characterY < 505) && ((characterX > 280 && characterX < 520) || (characterX > 880 && characterX < 1120)));
 }
 
 
