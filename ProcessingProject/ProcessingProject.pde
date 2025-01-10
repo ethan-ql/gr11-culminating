@@ -219,18 +219,18 @@ void draw() {
   //draw a platform on left side
   stroke(100, 50, 40);
   fill(100, 50, 40);
-  rect(300, 460, 200, 20);
+  rect(300, 495, 200, 20);
   stroke(90, 40, 30);
   fill(90, 40, 30);
-  rect(300, 460, 200, 5);
+  rect(300, 495, 200, 5);
 
   //draw a platform right side
   stroke(100, 50, 40);
   fill(100, 50, 40);
-  rect(900, 460, 200, 20);
+  rect(900, 495, 200, 20);
   stroke(90, 40, 30);
   fill(90, 40, 30);
-  rect(900, 460, 200, 5);
+  rect(900, 495, 200, 5);
 
   //SPAWNING ZOMBIES
   //call spawnZombie method for every set number of frames
@@ -247,7 +247,7 @@ void draw() {
 
 
 
-  //PARSE THROUGH ZOMBIE ARRAYS **FOR PRINTING**
+  //PARSE THROUGH ZOMBIE ARRAYS FOR PRINTING AND ATTACKING
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
     //check zombie death and kill accordingly
     if (zombieHp[zombieIndex] <= 0) {
@@ -750,7 +750,7 @@ void gameOver() {
  * post: none
  */
 boolean onLevel2() {
-  return ((characterY > 480 && characterY < 505) && ((characterX > 280 && characterX < 520) || (characterX > 880 && characterX < 1120)));
+  return ((characterY > 440 && characterY < 470) && ((characterX > 285 && characterX < 515) || (characterX > 890 && characterX < 1115)));
 }
 
 
@@ -835,7 +835,7 @@ void zombieAttackLeft(int zombieNum) {
     zombieHpBarX[zombieNum] = zombieX[zombieNum] - 55;
 
     //check if zombie was near character (should do damage)
-    if (Math.abs(zombieX[zombieNum] - characterX) <= ZOMBIE_JUMP_SPEED && characterY > 350) {
+    if (Math.abs(zombieX[zombieNum] - characterX) <= ZOMBIE_JUMP_SPEED && characterY > 470) {
       zombieDamaging[zombieNum] = true;
       characterX -= ZOMBIE_KNOCKBACK;
     }
@@ -892,7 +892,7 @@ void zombieAttackRight(int zombieNum) {
     zombieHpBarX[zombieNum] = zombieX[zombieNum] - 10;
 
     //check if zombie is near character (should do damage)
-    if (Math.abs(zombieX[zombieNum] - characterX) <= ZOMBIE_JUMP_SPEED && characterY > 350) {
+    if (Math.abs(zombieX[zombieNum] - characterX) <= ZOMBIE_JUMP_SPEED && characterY > 470) {
       zombieDamaging[zombieNum] = true;
       characterX += ZOMBIE_KNOCKBACK;
     }
