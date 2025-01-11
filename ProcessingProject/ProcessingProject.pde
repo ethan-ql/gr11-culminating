@@ -394,7 +394,7 @@ void draw() {
 
 
       //if the zombie is in attack range
-      if (characterY > 350 && ((facingRight && zombieX[zombieIndex] - characterX < 100 && zombieX[zombieIndex] - characterX > -20) || (!facingRight && characterX - zombieX[zombieIndex] < 100 && characterX - zombieX[zombieIndex] > -20)) && !zombieAttacked[zombieIndex]) {
+      if (characterY > 480 && ((facingRight && zombieX[zombieIndex] - characterX < 100 && zombieX[zombieIndex] - characterX > -20) || (!facingRight && characterX - zombieX[zombieIndex] < 100 && characterX - zombieX[zombieIndex] > -20)) && !zombieAttacked[zombieIndex]) {
 
         if (splashAttack) {
           //damage the zombie and state that it has already been damaged in this attack animation
