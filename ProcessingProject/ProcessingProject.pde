@@ -519,7 +519,7 @@ void draw() {
     textFont(mainFont, 40);
     fill(255, 255, 255);
     textAlign(LEFT, TOP);
-    text("CHARACTER HP", 50, 20);
+    text("KNIGHT HP", 50, 20);
 
 
     //wave progress bar:
@@ -696,7 +696,7 @@ void draw() {
     textFont(mainFont, 40);
     fill(255, 255, 255);
     textAlign(LEFT, TOP);
-    text("CHARACTER HP", 50, 20);
+    text("KNIGHT HP", 50, 20);
 
 
 
