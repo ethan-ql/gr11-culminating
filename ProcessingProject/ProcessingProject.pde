@@ -136,13 +136,23 @@ PImage zombieRightDown;
 PImage zombieRightAttack;
 PImage zombieRightJump;
 
-//declare background image
-PImage backgroundImage;
+//declare background images
+PImage bgGameplay;
+PImage bgBricks;
+
+//declare pause/play buttons
+PImage pauseButton;
+PImage playButton;
+
 
 //declare fonts:
 PFont mainFont;
 
-
+//menu state variable:
+//0: main menu
+//1: gameplay
+//2: paused
+int menuState = 1;
 
 /**
  * sets up the canvas that processing draws on
@@ -153,7 +163,7 @@ void setup() {
   //set size of canvas: 1400px wide, 700px tall
   size(1400, 700);
 
-  
+
 
   //load knight images
   knightLeftUp = loadImage("knightLeftUp.png");
@@ -175,9 +185,14 @@ void setup() {
   zombieRightAttack = loadImage("zombieRightAttack.png");
   zombieRightJump = loadImage("zombieRightJump.png");
 
-  //load backcground image
-  backgroundImage = loadImage("castleBackground.png");
-
+  //load background images
+  bgGameplay = loadImage("castleBackground.png");
+  bgBricks = loadImage("darkBrickWall.jpg");
+  
+  //load pause/play button images
+  pauseButton = loadImage("pauseButton.png");
+  playButton = loadImage("playButton.png");
+  
   //load and set font to tiny5
   mainFont = createFont("Tiny5-Regular.ttf", 150);
 
@@ -210,403 +225,502 @@ void setup() {
  */
 void draw() {
 
+  switch (menuState) {
+  case 0: //main menu
+
+    break;
+
+  case 1: //gameplay
+
+    //background image
+    background(bgGameplay);
 
 
-  //background image
-  background(backgroundImage);
+    //draw a platform on left side
+    stroke(100, 50, 40);
+    fill(100, 50, 40);
+    rect(300, 495, 200, 20);
+    stroke(90, 40, 30);
+    fill(90, 40, 30);
+    rect(300, 495, 200, 5);
 
+    //draw a platform right side
+    stroke(100, 50, 40);
+    fill(100, 50, 40);
+    rect(900, 495, 200, 20);
+    stroke(90, 40, 30);
+    fill(90, 40, 30);
+    rect(900, 495, 200, 5);
+    
+    
+    //draw ground
+    fill(20, 15, 45);
+    rect(0, 630, 1400, 70);
 
-  //draw a platform on left side
-  stroke(100, 50, 40);
-  fill(100, 50, 40);
-  rect(300, 495, 200, 20);
-  stroke(90, 40, 30);
-  fill(90, 40, 30);
-  rect(300, 495, 200, 5);
+    //SPAWNING ZOMBIES
+    //call spawnZombie method for every set number of frames
+    if (frameCount % zombieSpawnFrequency == 0) {
 
-  //draw a platform right side
-  stroke(100, 50, 40);
-  fill(100, 50, 40);
-  rect(900, 495, 200, 20);
-  stroke(90, 40, 30);
-  fill(90, 40, 30);
-  rect(900, 495, 200, 5);
-
-  //SPAWNING ZOMBIES
-  //call spawnZombie method for every set number of frames
-  if (frameCount % zombieSpawnFrequency == 0) {
-
-    //spawn correct amount of zombies
-    for (int i = 0; i < zombiesPerSpawn; i++) {
-      if (zombiesSpawned < zombiesPerWave && zombiesSpawned < MAX_ZOMBIES) { //put this check inside the for loop to not print extra zombies
-        spawnZombie();
-        zombiesSpawned++;
-      }
-    }
-  }
-
-
-
-  //PARSE THROUGH ZOMBIE ARRAYS FOR PRINTING AND ATTACKING
-  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-    //check zombie death and kill accordingly
-    if (zombieHp[zombieIndex] <= 0) {
-      killZombie(zombieIndex);
-      score += 50;
-    }
-    if (zombieState[zombieIndex] >= 1 && zombieState[zombieIndex] <=6 ) {
-      if (frameCount % 11 == 0) {
-        zombieUp[zombieIndex] = !zombieUp[zombieIndex];
-      }
-
-      rectMode(CENTER);
-      if (zombieState[zombieIndex] != 2 && zombieState[zombieIndex] != 4) {
-        if (characterX - zombieX[zombieIndex] >= ZOMBIE_SIGHT_RANGE) { // moving right
-          zombieState[zombieIndex] = 3;
-        } else if (zombieX[zombieIndex] - characterX >=  ZOMBIE_SIGHT_RANGE) { //moving left
-          zombieState[zombieIndex] = 1;
-        } else if (characterX - zombieX[zombieIndex] >= 0 && characterX - zombieX[zombieIndex] < ZOMBIE_SIGHT_RANGE ) { //moving right attacking
-          zombieState[zombieIndex] = 4;
-        } else if (zombieX[zombieIndex] - characterX >= 0 && zombieX[zombieIndex] - characterX < ZOMBIE_SIGHT_RANGE) { //moving left attacking
-          zombieState[zombieIndex] = 2;
+      //spawn correct amount of zombies
+      for (int i = 0; i < zombiesPerSpawn; i++) {
+        if (zombiesSpawned < zombiesPerWave && zombiesSpawned < MAX_ZOMBIES) { //put this check inside the for loop to not print extra zombies
+          spawnZombie();
+          zombiesSpawned++;
         }
       }
+    }
 
-      switch (zombieState[zombieIndex]) {
 
-      case 1: //moving left
-        zombieX[zombieIndex] -= zombieSpeed;
-        if (zombieUp[zombieIndex]) { //up position
-          image(zombieLeftUp, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
-        } else { //down position
-          image(zombieLeftDown, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
-        }
-        zombieHpBarX[zombieIndex] = zombieX[zombieIndex] - (55);
-        break;
 
-      case 2:
-        zombieAttackLeft(zombieIndex);
-        break;
-
-      case 3: //moving right
-        zombieX[zombieIndex] += zombieSpeed;
-        if (zombieUp[zombieIndex]) { //up position
-          image(zombieRightUp, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
-        } else { //down position
-          image(zombieRightDown, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
-        }
-        zombieHpBarX[zombieIndex] = zombieX[zombieIndex] - 10;
-        break;
-
-      case 4: //attacking right
-        zombieAttackRight(zombieIndex);
-        break;
+    //PARSE THROUGH ZOMBIE ARRAYS FOR PRINTING AND ATTACKING
+    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+      //check zombie death and kill accordingly
+      if (zombieHp[zombieIndex] <= 0) {
+        killZombie(zombieIndex);
+        score += 50;
       }
+      if (zombieState[zombieIndex] >= 1 && zombieState[zombieIndex] <=6 ) {
+        if (frameCount % 11 == 0) {
+          zombieUp[zombieIndex] = !zombieUp[zombieIndex];
+        }
 
-      //print zombie health bar
-      rectMode(CORNER);
-      noStroke();
-      fill(255, 0, 0);
-      rect((int) zombieHpBarX[zombieIndex], ZOMBIE_Y - 75, ((float) zombieHp[zombieIndex] / (float) zombieMaxHp) * 65, 10);
+        rectMode(CENTER);
+        if (zombieState[zombieIndex] != 2 && zombieState[zombieIndex] != 4) {
+          if (characterX - zombieX[zombieIndex] >= ZOMBIE_SIGHT_RANGE) { // moving right
+            zombieState[zombieIndex] = 3;
+          } else if (zombieX[zombieIndex] - characterX >=  ZOMBIE_SIGHT_RANGE) { //moving left
+            zombieState[zombieIndex] = 1;
+          } else if (characterX - zombieX[zombieIndex] >= 0 && characterX - zombieX[zombieIndex] < ZOMBIE_SIGHT_RANGE ) { //moving right attacking
+            zombieState[zombieIndex] = 4;
+          } else if (zombieX[zombieIndex] - characterX >= 0 && zombieX[zombieIndex] - characterX < ZOMBIE_SIGHT_RANGE) { //moving left attacking
+            zombieState[zombieIndex] = 2;
+          }
+        }
 
-      stroke(200, 200, 200);
-      strokeWeight(4);
-      noFill();
-      rect((int) zombieHpBarX[zombieIndex], ZOMBIE_Y - 75, 65, 10);
-      strokeWeight(0);
+        switch (zombieState[zombieIndex]) {
+
+        case 1: //moving left
+          zombieX[zombieIndex] -= zombieSpeed;
+          if (zombieUp[zombieIndex]) { //up position
+            image(zombieLeftUp, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
+          } else { //down position
+            image(zombieLeftDown, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
+          }
+          zombieHpBarX[zombieIndex] = zombieX[zombieIndex] - (55);
+          break;
+
+        case 2:
+          zombieAttackLeft(zombieIndex);
+          break;
+
+        case 3: //moving right
+          zombieX[zombieIndex] += zombieSpeed;
+          if (zombieUp[zombieIndex]) { //up position
+            image(zombieRightUp, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
+          } else { //down position
+            image(zombieRightDown, (float) zombieX[zombieIndex], ZOMBIE_Y, 130, 130);
+          }
+          zombieHpBarX[zombieIndex] = zombieX[zombieIndex] - 10;
+          break;
+
+        case 4: //attacking right
+          zombieAttackRight(zombieIndex);
+          break;
+        }
+
+        //print zombie health bar
+        rectMode(CORNER);
+        noStroke();
+        fill(255, 0, 0);
+        rect((int) zombieHpBarX[zombieIndex], ZOMBIE_Y - 75, ((float) zombieHp[zombieIndex] / (float) zombieMaxHp) * 65, 10);
+
+        stroke(200, 200, 200);
+        strokeWeight(4);
+        noFill();
+        rect((int) zombieHpBarX[zombieIndex], ZOMBIE_Y - 75, 65, 10);
+        strokeWeight(0);
+      }
     }
-  }
-  rectMode(CORNER);
+    rectMode(CORNER);
 
 
-  //CHARACTER MOVEMENT:
-  //check if character is on screen and which direction it should move, move it accordingly
-  if (moveRight) {
-    characterX += CHARACTER_SPEED;
-  }
-  if (moveLeft) {
-    characterX -= CHARACTER_SPEED;
-  }
-
-  //change character up and down every few frames to simulate walking motion
-  if (frameCount % 7 == 0) {
-    characterUp = !characterUp;
-  }
-
-  //if character was on level 2 & now off the platform & not already falling
-  if (characterLevel == 2 && !onLevel2() && !falling) {
-    falling = true;
-    fallFrame = 0;
-  }
-
-  //fall code
-  if (falling && !jumping) {
-
-    if (characterY < 550) {
-      characterY +=  fallFrame;
-      fallFrame++;
-    } else {
-      characterLevel = 1;
-      characterY = 585;
-      falling = false;
-      fallFrame = 0;
+    //CHARACTER MOVEMENT:
+    //check if character is on screen and which direction it should move, move it accordingly
+    if (moveRight) {
+      characterX += CHARACTER_SPEED;
+    }
+    if (moveLeft) {
+      characterX -= CHARACTER_SPEED;
     }
 
-    if (onLevel2()) {
-      characterLevel = 2;
-      falling = false;
-      jumpFrame = 0;
-      fallFrame = 0;
+    //change character up and down every few frames to simulate walking motion
+    if (frameCount % 7 == 0) {
+      characterUp = !characterUp;
     }
-  }
 
-  //if character should be jumping
-  if (jumping) {
-    characterY -= -2 * (jumpFrame - JUMP_LENGTH);
-    jumpFrame++;
-    falling = false;
-    if (jumpFrame == JUMP_LENGTH) {
-      jumping = false;
+    //if character was on level 2 & now off the platform & not already falling
+    if (characterLevel == 2 && !onLevel2() && !falling) {
       falling = true;
       fallFrame = 0;
     }
-  }
 
+    //fall code
+    if (falling && !jumping) {
 
+      if (characterY < 550) {
+        characterY +=  fallFrame;
+        fallFrame++;
+      } else {
+        characterLevel = 1;
+        characterY = 585;
+        falling = false;
+        fallFrame = 0;
+      }
 
-
-
-
-  //CHARACTER ATTACK
-  if (attacking) {
-
-    if (attackFrame == 0) {
-      attackCooldown = 20;
+      if (onLevel2()) {
+        characterLevel = 2;
+        falling = false;
+        jumpFrame = 0;
+        fallFrame = 0;
+      }
     }
 
-    attackFrame++;
+    //if character should be jumping
+    if (jumping) {
+      characterY -= -2 * (jumpFrame - JUMP_LENGTH);
+      jumpFrame++;
+      falling = false;
+      if (jumpFrame == JUMP_LENGTH) {
+        jumping = false;
+        falling = true;
+        fallFrame = 0;
+      }
+    }
 
-    closestZombieX = -1000;
-    closestZombie = -1;
-
-    //parse through zombie arrays to check if they have been hit
-    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
 
 
-      //if the zombie is in attack range
-      if (characterY > 480 && ((facingRight && zombieX[zombieIndex] - characterX < 100 && zombieX[zombieIndex] - characterX > -20) || (!facingRight && characterX - zombieX[zombieIndex] < 100 && characterX - zombieX[zombieIndex] > -20)) && !zombieAttacked[zombieIndex]) {
 
-        if (splashAttack) {
+
+
+    //CHARACTER ATTACK
+    if (attacking) {
+
+      if (attackFrame == 0) {
+        attackCooldown = 20;
+      }
+
+      attackFrame++;
+
+      closestZombieX = -1000;
+      closestZombie = -1;
+
+      //parse through zombie arrays to check if they have been hit
+      for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+
+
+        //if the zombie is in attack range
+        if (characterY > 480 && ((facingRight && zombieX[zombieIndex] - characterX < 100 && zombieX[zombieIndex] - characterX > -20) || (!facingRight && characterX - zombieX[zombieIndex] < 100 && characterX - zombieX[zombieIndex] > -20)) && !zombieAttacked[zombieIndex]) {
+
+          if (splashAttack) {
+            //damage the zombie and state that it has already been damaged in this attack animation
+            zombieHp[zombieIndex] -= characterDamage;
+            zombieAttacked[zombieIndex] = true;
+
+            //knock the zombies back in the correct direction
+            if (facingRight) {
+              zombieX[zombieIndex] += CHARACTER_KNOCKBACK;
+            } else {
+              zombieX[zombieIndex] -= CHARACTER_KNOCKBACK;
+            }
+
+            //set closestZombie variable to zombieNum with smallest zombieX
+          } else if (!splashAttack && Math.abs(closestZombieX - characterX) > Math.abs(zombieX[zombieIndex] - characterX)) {
+            closestZombieX = zombieX[zombieIndex];
+            closestZombie = zombieIndex;
+          }
+        }
+      }
+
+      if (closestZombie != -1) { //this for loop needs to be put first otherwise it will index -1 which is out of bounds
+        if (!splashAttack && !zombieAttacked[closestZombie]) {
           //damage the zombie and state that it has already been damaged in this attack animation
-          zombieHp[zombieIndex] -= characterDamage;
-          zombieAttacked[zombieIndex] = true;
+          zombieHp[closestZombie] -= characterDamage;
 
           //knock the zombies back in the correct direction
           if (facingRight) {
-            zombieX[zombieIndex] += CHARACTER_KNOCKBACK;
+            zombieX[closestZombie] += CHARACTER_KNOCKBACK;
           } else {
-            zombieX[zombieIndex] -= CHARACTER_KNOCKBACK;
+            zombieX[closestZombie] -= CHARACTER_KNOCKBACK;
           }
 
-          //set closestZombie variable to zombieNum with smallest zombieX
-        } else if (!splashAttack && Math.abs(closestZombieX - characterX) > Math.abs(zombieX[zombieIndex] - characterX)) {
-          closestZombieX = zombieX[zombieIndex];
-          closestZombie = zombieIndex;
+          //only one zombie can be attacked when splashAttack is off, so this loop sets all zombie to having been attacked to ensure that none can be attacked again
+          for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+            zombieAttacked[zombieIndex] = true;
+          }
         }
+      }
+
+      //end character attack if it has been going for 20 frames
+      if (attackFrame > 20) {
+        attacking = false;
+        attackFrame = -1;
       }
     }
 
-    if (closestZombie != -1) { //this for loop needs to be put first otherwise it will index -1 which is out of bounds
-      if (!splashAttack && !zombieAttacked[closestZombie]) {
-        //damage the zombie and state that it has already been damaged in this attack animation
-        zombieHp[closestZombie] -= characterDamage;
+    //progress attackCooldown
+    if (attackCooldown > 0) {
+      attackCooldown--;
+    }
 
-        //knock the zombies back in the correct direction
-        if (facingRight) {
-          zombieX[closestZombie] += CHARACTER_KNOCKBACK;
-        } else {
-          zombieX[closestZombie] -= CHARACTER_KNOCKBACK;
-        }
 
-        //only one zombie can be attacked when splashAttack is off, so this loop sets all zombie to having been attacked to ensure that none can be attacked again
-        for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-          zombieAttacked[zombieIndex] = true;
-        }
+    //DRAW UI AT TOP OF SCREEN
+
+    //Character health bar:
+    //inside
+    rectMode(CORNER);
+    noStroke();
+    fill(255, 20, 20);
+    rect(50, 60, characterHp * 3, 60);
+
+    //outside
+    stroke(200, 200, 200);
+    strokeWeight(12);
+    noFill();
+    rect(50, 60, 300, 60);
+
+    //label
+    textFont(mainFont, 40);
+    fill(255, 255, 255);
+    textAlign(LEFT, TOP);
+    text("CHARACTER HP", 50, 20);
+
+
+    //wave progress bar:
+    //inside
+    rectMode(CORNER);
+    noStroke();
+    fill(255, 255, 20); //yellow
+    rect(1050, 60, (float) zombiesKilled / (float) zombiesPerWave * 300, 60); //zombiesKilled and zombiesPerWave are cast as floats to avoid unwanted rounding
+
+    //outside
+    stroke(200, 200, 200); //grey
+    strokeWeight(12); //border only
+    noFill();
+    rect(1050, 60, 300, 60);
+    strokeWeight(0);
+
+    //wave progress label
+    textFont(mainFont, 40);
+    fill(255, 255, 255);
+    textAlign(RIGHT, TOP);
+    text("WAVE PROGRESS", 1350, 20);
+
+
+    //waves label:
+    textFont(mainFont, 40);
+    fill(255, 255, 255);
+    textAlign(CENTER, TOP);
+    text("WAVE: \n"+wave, 525, 25);
+
+    //score label:
+    textFont(mainFont, 40);
+    fill(255, 255, 255);
+    textAlign(CENTER, TOP);
+    text("SCORE: \n"+score, 875, 25);
+
+    //draw pause button
+    imageMode(CENTER);
+    image(pauseButton, 700, 60, 80, 80);
+
+
+
+
+    //ENSURE CHARACTER STAYS ON SCREEN
+    if (characterX > 1400) {
+      characterX = 1400;
+    } else if (characterX < 0) {
+      characterX = 0;
+    }
+
+    //DRAW CHARACTER:
+    imageMode(CENTER);
+
+    //facing left and not attacking
+    if (!facingRight && !attacking) {
+
+      //not moving or moving left and character up
+      if ((characterUp && moveLeft) || !moveLeft) {
+        image(knightLeftUp, characterX, characterY, 110, 110);
+        //moving left (and character down)
+      } else if (moveLeft) {
+        image(knightLeftDown, characterX, characterY, 110, 110);
+      }
+
+      //facing left and attacking
+    } else if (!facingRight && attacking) {
+
+      //not moving or moving left and character up
+      if ((characterUp && moveLeft) || !moveLeft) {
+        image(knightLeftUpAttack, characterX, characterY, 110, 110);
+
+        //moving left (and character down)
+      } else if (moveLeft) {
+        image(knightLeftDownAttack, characterX, characterY, 110, 110);
+      }
+
+      //facing right and not attacking
+    } else if (facingRight && !attacking) {
+
+      //not moving or moving right and character up
+      if ((characterUp && moveRight) || !moveRight) {
+        image(knightRightUp, characterX, characterY, 110, 110);
+
+        //moving right (and character down)
+      } else if (moveRight) {
+        image(knightRightDown, characterX, characterY, 110, 110);
+      }
+
+      //facing right and attacking
+    } else if (facingRight && attacking) {
+
+      //not moving or moving right and character up
+      if ((characterUp && moveRight) || !moveRight) {
+        image(knightRightUpAttack, characterX, characterY, 110, 110);
+
+        //moving right (and character down)
+      } else if (moveRight) {
+        image(knightRightDownAttack, characterX, characterY, 110, 110);
       }
     }
 
-    //end character attack if it has been going for 20 frames
-    if (attackFrame > 20) {
-      attacking = false;
-      attackFrame = -1;
+
+    //draw cooldown bar
+    rectMode(CORNER);
+    if (facingRight && attackCooldown > 0) { //facing right (different X position than left)
+      //inside
+      noStroke();
+      fill(20, 20, 255); //blue
+      rect(characterX - 50, characterY - 70, attackCooldown * 3, 10);
+
+      //outside
+      stroke(200, 200, 200); //grey
+      strokeWeight(4); //border of the bar
+      noFill();
+      rect(characterX - 50, characterY - 70, 60, 10);
+      strokeWeight(0);
+    } else if (!facingRight && attackCooldown > 0) { //facing left
+      //inside
+      noStroke();
+      fill(20, 20, 255); //blue
+      rect(characterX - 10, characterY - 70, attackCooldown * 3, 10);
+
+      //outside
+      stroke(200, 200, 200); //grey
+      strokeWeight(4); //border of the bar
+      noFill();
+      rect(characterX - 10, characterY - 70, 60, 10);
+      strokeWeight(0);
     }
-  }
-
-  //progress attackCooldown
-  if (attackCooldown > 0) {
-    attackCooldown--;
-  }
-
-
-  //DRAW VALUE BARS AT TOP OF SCREEN
-
-  //Character health bar:
-  //inside
-  rectMode(CORNER);
-  noStroke();
-  fill(255, 20, 20);
-  rect(50, 60, characterHp * 3, 60);
-
-  //outside
-  stroke(200, 200, 200);
-  strokeWeight(12);
-  noFill();
-  rect(50, 60, 300, 60);
-
-  //label
-  textFont(mainFont, 40);
-  fill(255, 255, 255);
-  textAlign(LEFT, TOP);
-  text("CHARACTER HP", 50, 20);
 
 
 
 
 
-  //wave progress bar:
-  //inside
-  rectMode(CORNER);
-  noStroke();
-  fill(255, 255, 20); //yellow
-  rect(1050, 60, (float) zombiesKilled / (float) zombiesPerWave * 300, 60); //zombiesKilled and zombiesPerWave are cast as floats to avoid unwanted rounding
-
-  //outside
-  stroke(200, 200, 200); //grey
-  strokeWeight(12); //border only
-  noFill();
-  rect(1050, 60, 300, 60);
-  strokeWeight(0);
-
-  //cooldown label
-  textFont(mainFont, 40);
-  fill(255, 255, 255);
-  textAlign(RIGHT, TOP);
-  text("WAVE PROGRESS", 1350, 20);
-
-
-  //waves label:
-  textFont(mainFont, 40);
-  fill(255, 255, 255);
-  textAlign(CENTER, TOP);
-  text("WAVE: "+wave, 700, 20);
-
-  //score label:
-  textFont(mainFont, 40);
-  fill(255, 255, 255);
-  textAlign(CENTER, TOP);
-  text("SCORE: "+score, 700, 70);
-
-
-  //ENSURE CHARACTER STAYS ON SCREEN
-  if (characterX > 1400) {
-    characterX = 1400;
-  } else if (characterX < 0) {
-    characterX = 0;
-  }
-
-
-
-  //DRAW CHARACTER:
-  imageMode(CENTER);
-
-  //facing left, not attacking
-  if (!facingRight && !attacking) {
-
-
-    if ((characterUp && moveLeft) || !moveLeft) {
-      image(knightLeftUp, characterX, characterY, 110, 110);
-    } else if (moveLeft) {
-      image(knightLeftDown, characterX, characterY, 110, 110);
+    //DRAW TRANSPARENT RED ON SCREEN WHEN CHARACTER IS DAMAGED
+    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+      if (zombieDamaging[zombieIndex]) {
+        fill(255, 0, 0, 50);
+        rect(0, 0, 1400, 700);
+      }
     }
-  } else if (!facingRight && attacking) {
 
-    if ((characterUp && moveLeft) || !moveLeft) {
-      image(knightLeftUpAttack, characterX, characterY, 110, 110);
-    } else if (moveLeft) {
-      image(knightLeftDownAttack, characterX, characterY, 110, 110);
+
+    //CHECK FOR CHARACTER DEATH
+    if (characterHp <= 0) {
+      gameOver();
     }
-  } else if (facingRight && !attacking) {
 
-    if ((characterUp && moveRight) || !moveRight) {
-      image(knightRightUp, characterX, characterY, 110, 110);
-    } else if (moveRight) {
-      image(knightRightDown, characterX, characterY, 110, 110);
+
+    //CHECK IF USER HAS KILLED ALL ZOMBIES
+    if (zombiesKilled >= zombiesPerWave) {
+      nextWave();
     }
-  } else if (facingRight && attacking) {
+    break;
 
-    if ((characterUp && moveRight) || !moveRight) {
-      image(knightRightUpAttack, characterX, characterY, 110, 110);
-    } else if (moveRight) {
-      image(knightRightDownAttack, characterX, characterY, 110, 110);
-    }
-  }
+  case 2: //paused
+    background(bgBricks);
 
+    //DRAW UI AT TOP OF SCREEN
 
-
-  //draw cooldown bar
-  rectMode(CORNER);
-  if (facingRight && attackCooldown > 0) { //facing right (different X position than left)
+    //Character health bar:
     //inside
+    rectMode(CORNER);
     noStroke();
-    fill(20, 20, 255); //blue
-    rect(characterX - 50, characterY - 70, attackCooldown * 3, 10);
+    fill(255, 20, 20);
+    rect(50, 60, characterHp * 3, 60);
+
+    //outside
+    stroke(200, 200, 200);
+    strokeWeight(12);
+    noFill();
+    rect(50, 60, 300, 60);
+
+    //label
+    textFont(mainFont, 40);
+    fill(255, 255, 255);
+    textAlign(LEFT, TOP);
+    text("CHARACTER HP", 50, 20);
+
+
+
+    //wave progress bar:
+    //inside
+    rectMode(CORNER);
+    noStroke();
+    fill(255, 255, 20); //yellow
+    rect(1050, 60, (float) zombiesKilled / (float) zombiesPerWave * 300, 60); //zombiesKilled and zombiesPerWave are cast as floats to avoid unwanted rounding
 
     //outside
     stroke(200, 200, 200); //grey
-    strokeWeight(4); //border of the bar
+    strokeWeight(12); //border only
     noFill();
-    rect(characterX - 50, characterY - 70, 60, 10);
+    rect(1050, 60, 300, 60);
     strokeWeight(0);
-  } else if (!facingRight && attackCooldown > 0) { //facing left
-    //inside
-    noStroke();
-    fill(20, 20, 255); //blue
-    rect(characterX - 10, characterY - 70, attackCooldown * 3, 10);
 
-    //outside
-    stroke(200, 200, 200); //grey
-    strokeWeight(4); //border of the bar
-    noFill();
-    rect(characterX - 10, characterY - 70, 60, 10);
-    strokeWeight(0);
-  }
+    //wave progress label
+    textFont(mainFont, 40);
+    fill(255, 255, 255);
+    textAlign(RIGHT, TOP);
+    text("WAVE PROGRESS", 1350, 20);
 
 
+    //waves label:
+    textFont(mainFont, 40);
+    fill(255, 255, 255);
+    textAlign(CENTER, TOP);
+    text("WAVE: \n"+wave, 525, 25);
 
+    //score label:
+    textFont(mainFont, 40);
+    fill(255, 255, 255);
+    textAlign(CENTER, TOP);
+    text("SCORE: \n"+score, 875, 25);
 
+    //draw play button
+    imageMode(CENTER);
+    image(playButton, 700, 60, 80, 80);
 
-  //DRAW TRANSPARENT RED ON SCREEN WHEN CHARACTER IS DAMAGED
-  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-    if (zombieDamaging[zombieIndex]) {
-      fill(255, 0, 0, 50);
-      rect(0, 0, 1400, 700);
-    }
-  }
-
-
-  //CHECK FOR CHARACTER DEATH
-  if (characterHp <= 0) {
-    gameOver();
-  }
-
-
-  //CHECK IF USER HAS KILLED ALL ZOMBIES
-  if (zombiesKilled >= zombiesPerWave) {
-    nextWave();
+    break;
   }
 }
 
 
+
+
+
+
+
+//this giant whitespace is here to very clearly separate the draw method (which is the largest and most important) with the other methods
 
 
 
@@ -621,8 +735,21 @@ void draw() {
  * post: attacking = true (if cooldown is finished and attack animation is still going)
  */
 void mousePressed() {
+  //USING MOUSE TO ATTACK:
   if (attackFrame >= 0 && attackCooldown == 0) {
     attacking = true;
+  }
+
+  //PAUSE BUTTON: 
+  if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) {
+    switch (menuState) {
+      case 1: //gameplay is running: pause it
+        menuState = 2;
+        break;
+     case 2: //gameplay is paused: run it
+        menuState = 1;
+        break;
+    }
   }
 }
 
@@ -632,6 +759,7 @@ void mousePressed() {
  * post: attacking = false, attackFrame = 0, all zombieAttacked = false
  */
 void mouseReleased() {
+  //same as j released
   attacking = false;
   attackFrame = 0;
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
@@ -656,11 +784,11 @@ void keyPressed() {
     moveLeft = true;
     facingRight = false;
   }
-  if (key == 'j' && attackFrame >= 0 && attackCooldown == 0) {
+  if ((key == 'j' || key == 's') && attackFrame >= 0 && attackCooldown == 0) {
     attacking = true;
   }
 
-  if (key == ' ' && !jumping && !falling) {
+  if ((key == ' ' || key == 'w') && !jumping && !falling) {
     jumping = true;
     jumpFrame = 0;
   }
@@ -694,7 +822,7 @@ void keyReleased() {
     moveLeft = false;
   }
 
-  if (key == 'j') {
+  if (key == 'j' || key == 's') {
     attacking = false;
     attackFrame = 0;
     for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
