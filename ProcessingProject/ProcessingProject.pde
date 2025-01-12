@@ -140,10 +140,14 @@ PImage zombieRightJump;
 PImage bgGameplay;
 PImage bgBricks;
 
-//declare pause/play buttons
+//declare button images
 PImage pauseButton;
 PImage playButton;
+PImage bigPlayButtonUp;
+PImage bigPlayButtonDown;
 
+//declare misc images
+PImage titleShape;
 
 //declare fonts:
 PFont mainFont;
@@ -152,7 +156,7 @@ PFont mainFont;
 //0: main menu
 //1: gameplay
 //2: paused
-int menuState = 1;
+int menuState = 0;
 
 /**
  * sets up the canvas that processing draws on
@@ -189,9 +193,14 @@ void setup() {
   bgGameplay = loadImage("castleBackground.png");
   bgBricks = loadImage("darkBrickWall.jpg");
   
-  //load pause/play button images
+  //load button images
   pauseButton = loadImage("pauseButton.png");
   playButton = loadImage("playButton.png");
+  bigPlayButtonUp = loadImage("bigPlayButtonUp.png");
+  bigPlayButtonDown = loadImage("bigPlayButtonDown.png");
+  
+  //load misc images
+  titleShape = loadImage("titleShape.png");
   
   //load and set font to tiny5
   mainFont = createFont("Tiny5-Regular.ttf", 150);
@@ -227,8 +236,26 @@ void draw() {
 
   switch (menuState) {
   case 0: //main menu
-
+    
+    //brick background
+    background(bgBricks);
+    
+    
+    //title
+    imageMode(CENTER);
+    image(titleShape, 700, 130, 1350, 180);
+    textFont(mainFont, 160);
+    fill(145, 50, 205);
+    textAlign(CENTER, CENTER);
+    text("FORTRESS FIGHT", 710, 130);
+    
+    //play button
+    imageMode(CENTER);
+    image(bigPlayButtonUp, 700, 450, 230, 230); 
+    
     break;
+
+
 
   case 1: //gameplay
 
@@ -739,18 +766,33 @@ void mousePressed() {
   if (attackFrame >= 0 && attackCooldown == 0) {
     attacking = true;
   }
-
-  //PAUSE BUTTON: 
-  if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) {
-    switch (menuState) {
-      case 1: //gameplay is running: pause it
-        menuState = 2;
-        break;
-     case 2: //gameplay is paused: run it
+  switch (menuState) {
+    case 0: //main menu
+      
+      //big play button
+      if (mouseX > 585 && mouseX < 815 && mouseY > 335 && mouseY < 585) {
         menuState = 1;
-        break;
-    }
+      }
+      
+      break;
+      
+    case 1: //gameplay 
+      
+      //pause button
+      if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) { 
+        menuState = 2;
+      }
+      
+      break;
+      
+    case 2: //paused
+      //play button
+      if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) { 
+        menuState = 1;
+      }
+      break;
   }
+  
 }
 
 /**
