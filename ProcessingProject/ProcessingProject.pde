@@ -817,24 +817,43 @@ void mouseReleased() {
  * post: none
  */
 void keyPressed() {
-  //move right when d is pressed
-  if (key == 'd') {
+  //d/D: move right
+  if (key == 'd' || key == 'D') {
     moveRight = true;
     facingRight = true;
-    //move left when a is pressed
-  } else if (key == 'a') {
+  
+  //a/A: move left
+  } else if (key == 'a' || key == 'A') {
     moveLeft = true;
     facingRight = false;
   }
-  if ((key == 'j' || key == 's') && attackFrame >= 0 && attackCooldown == 0) {
+  
+  //j/J/s/S: attack
+  if ((key == 'j' || key == 'J' || key == 's' || key == 'S') && attackFrame >= 0 && attackCooldown == 0) {
     attacking = true;
   }
-
-  if ((key == ' ' || key == 'w') && !jumping && !falling) {
+  
+  //tab: pause/play
+  if (key == TAB) {
+    if (menuState == 1) {
+      menuState = 2;
+    } else if (menuState == 2) {
+      menuState = 1;
+    }
+  }
+  
+  //play from main menu
+  if (menuState == 0 && key == ENTER) {
+    menuState = 1;
+  }
+  
+  //' '/w/W: jump
+  if ((key == ' ' || key == 'w' || key == 'W') && !jumping && !falling) {
     jumping = true;
     jumpFrame = 0;
   }
 
+  //DEBUG ONLY: kill all zombies with '~'
   if (key == '~') {
     for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
       killZombie(zombieIndex);
@@ -848,27 +867,31 @@ void keyPressed() {
  * post: none
  */
 void keyReleased() {
-  if (key == 'd') {
+  //d/D: stop moving right
+  if (key == 'd' || key == 'D') {
 
     if (moveRight && moveLeft) {
-      facingRight = false;
+      facingRight = false; //to ensure the character faces the right direction
     }
 
     moveRight = false;
-  } else if (key == 'a') {
+  
+  //a/A: stop moving left
+  } else if (key == 'a' || key == 'A') {
 
     if (moveRight && moveLeft) {
-      facingRight = true;
+      facingRight = true; //to ensure the character faces the right direction
     }
 
     moveLeft = false;
   }
-
-  if (key == 'j' || key == 's') {
+  
+  //j/J/s/S: stop attacking
+  if (key == 'j' || key == 'J' || key == 's' || key == 'S') {
     attacking = false;
     attackFrame = 0;
     for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-      zombieAttacked[zombieIndex] = false;
+      zombieAttacked[zombieIndex] = false; //resets all zombies to allow them to be attacked again
     }
   }
 }
