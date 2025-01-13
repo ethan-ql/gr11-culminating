@@ -150,6 +150,12 @@ PImage bigPlayButtonDown;
 PImage buttonShapeUp;
 PImage buttonShapeDown;
 
+PImage pineapple;
+int x = 700;
+int y = 350;
+int xSpeed = 8;
+int ySpeed = 8;
+
 //declare misc images
 PImage titleShape;
 
@@ -176,7 +182,7 @@ void setup() {
   //set size of canvas: 1400px wide, 700px tall
   size(1400, 700);
 
-
+  pineapple = loadImage("pineapple.jpeg");
 
   //load knight images
   knightLeftUp = loadImage("knightLeftUp.png");
@@ -292,7 +298,9 @@ void draw() {
 
     //background image
     background(bgGameplay);
-
+    
+    
+    
 
     //draw a platform on left side
     stroke(100, 50, 40);
@@ -707,11 +715,33 @@ void draw() {
     if (zombiesKilled >= zombiesPerWave) {
       nextWave();
     }
+    
+    imageMode(CORNER);
+    // Draw the image at the current position
+    image(pineapple, x, y, 100, 100);
+    
+    // Move the image
+    x += xSpeed;
+    y += ySpeed;
+    
+    // Check for collision with the edges and reverse speed when hitting the borders
+    if (x <= 0 || x + 100 >= 1400) {
+      xSpeed *= -1;
+    }
+    
+    if (y <= 0 || y + 100 >= 700) {
+      ySpeed *= -1;
+    }
+    imageMode(CENTER);
+    
     break;
+
+
+
 
   case 2: //paused
     background(bgBricks);
-
+    
     //DRAW UI AT TOP OF SCREEN
 
     //Character health bar:
