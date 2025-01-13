@@ -147,6 +147,8 @@ PImage playButtonUp;
 PImage playButtonDown;
 PImage bigPlayButtonUp;
 PImage bigPlayButtonDown;
+PImage buttonShapeUp;
+PImage buttonShapeDown;
 
 //declare misc images
 PImage titleShape;
@@ -207,6 +209,8 @@ void setup() {
   playButtonDown = loadImage("playButtonDown.png");
   bigPlayButtonUp = loadImage("bigPlayButtonUp.png");
   bigPlayButtonDown = loadImage("bigPlayButtonDown.png");
+  buttonShapeUp = loadImage("buttonShapeUp.png");
+  buttonShapeDown = loadImage("buttonShapeUp.png");
   
   //load misc images
   titleShape = loadImage("titleShape.png");
@@ -258,15 +262,26 @@ void draw() {
     textAlign(CENTER, CENTER);
     text("FORTRESS FIGHT", 710, 130);
     
-    //play button
+    //buttons
     imageMode(CENTER);
     
+    //big play button
     if (buttonPressed != 1) { //big play button not pressed
       image(bigPlayButtonUp, 700, 450, 230, 230); 
       
     } else { //big play button pressed
       image(bigPlayButtonDown, 700, 450, 230, 230);
     }
+    
+    //settings 
+    if (buttonPressed != 2) { //big play button not pressed
+      image(buttonShapeUp, 300, 450, 400, 200); 
+      
+    } else { //big play button pressed
+      image(buttonShapeDown, 300, 450, 400, 200);
+    }
+    
+    
     
     
     break;
