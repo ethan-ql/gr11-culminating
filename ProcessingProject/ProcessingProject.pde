@@ -141,8 +141,10 @@ PImage bgGameplay;
 PImage bgBricks;
 
 //declare button images
-PImage pauseButton;
-PImage playButton;
+PImage pauseButtonUp;
+PImage pauseButtonDown;
+PImage playButtonUp;
+PImage playButtonDown;
 PImage bigPlayButtonUp;
 PImage bigPlayButtonDown;
 
@@ -157,6 +159,11 @@ PFont mainFont;
 //1: gameplay
 //2: paused
 int menuState = 0;
+
+//buttonPressed variable:
+//0: nothing
+//1: big play/play/pause
+int buttonPressed = 0;
 
 /**
  * sets up the canvas that processing draws on
@@ -194,8 +201,10 @@ void setup() {
   bgBricks = loadImage("darkBrickWall.jpg");
   
   //load button images
-  pauseButton = loadImage("pauseButton.png");
-  playButton = loadImage("playButton.png");
+  pauseButtonUp = loadImage("pauseButtonUp.png");
+  pauseButtonDown = loadImage("pauseButtonDown.png");
+  playButtonUp = loadImage("playButtonUp.png");
+  playButtonDown = loadImage("playButtonDown.png");
   bigPlayButtonUp = loadImage("bigPlayButtonUp.png");
   bigPlayButtonDown = loadImage("bigPlayButtonDown.png");
   
@@ -251,7 +260,14 @@ void draw() {
     
     //play button
     imageMode(CENTER);
-    image(bigPlayButtonUp, 700, 450, 230, 230); 
+    
+    if (buttonPressed != 1) { //big play button not pressed
+      image(bigPlayButtonUp, 700, 450, 230, 230); 
+      
+    } else { //big play button pressed
+      image(bigPlayButtonDown, 700, 450, 230, 230);
+    }
+    
     
     break;
 
@@ -557,8 +573,12 @@ void draw() {
 
     //draw pause button
     imageMode(CENTER);
-    image(pauseButton, 700, 60, 80, 80);
-
+    if (buttonPressed != 1) { //pause button not pressed
+      image(pauseButtonUp, 700, 60, 80, 80);
+      
+    } else { //pause button being pressed
+      image(pauseButtonDown, 700, 60, 80, 80);
+    }
 
 
 
@@ -735,12 +755,17 @@ void draw() {
 
     //draw play button
     imageMode(CENTER);
-    image(playButton, 700, 60, 80, 80);
+    if (buttonPressed != 1) { //play button not pressed
+      image(playButtonUp, 700, 60, 80, 80);
+      
+    } else { //play button being pressed
+      image(playButtonDown, 700, 60, 80, 80);
+    }
+
 
     break;
   }
-}
-
+} //END DRAW METHOD
 
 
 
@@ -757,38 +782,38 @@ void draw() {
 
 
 /**
- * checks if the mouse is clicked (used to attack)
+ * checks if the mouse is clicked (used to attack and press buttons)
  * pre: none
  * post: attacking = true (if cooldown is finished and attack animation is still going)
  */
 void mousePressed() {
-  //USING MOUSE TO ATTACK:
-  if (attackFrame >= 0 && attackCooldown == 0) {
-    attacking = true;
-  }
   switch (menuState) {
     case 0: //main menu
       
-      //big play button
+      //press big play button
       if (mouseX > 585 && mouseX < 815 && mouseY > 335 && mouseY < 585) {
-        menuState = 1;
+        buttonPressed = 1;
       }
       
       break;
       
     case 1: //gameplay 
+      //attacking
+      if (attackFrame >= 0 && attackCooldown == 0) {
+        attacking = true;
+      }
       
-      //pause button
+      //press pause button
       if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) { 
-        menuState = 2;
+        buttonPressed = 1;
       }
       
       break;
       
     case 2: //paused
-      //play button
+      // press play button
       if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) { 
-        menuState = 1;
+        buttonPressed = 1;
       }
       break;
   }
@@ -801,12 +826,42 @@ void mousePressed() {
  * post: attacking = false, attackFrame = 0, all zombieAttacked = false
  */
 void mouseReleased() {
-  //same as j released
-  attacking = false;
-  attackFrame = 0;
-  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-    zombieAttacked[zombieIndex] = false;
+  switch (menuState) {
+    case 0: //main menu
+      
+      //release big play button
+      if (buttonPressed == 1) {
+        menuState = 1;
+        buttonPressed = 0; //reset
+      }
+      
+      break;
+      
+    case 1: //gameplay 
+      //stop attacking - same as j released
+      attacking = false;
+      attackFrame = 0;
+      for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+        zombieAttacked[zombieIndex] = false;
+      }
+      
+      //release pause button
+      if (buttonPressed == 1) { 
+        menuState = 2;
+        buttonPressed = 0; //reset
+      }
+      
+      break;
+      
+    case 2: //paused
+      //release play button
+      if (buttonPressed == 1) { 
+        menuState = 1;
+        buttonPressed = 0; //reset
+      }
+      break;
   }
+  
 }
 
 
@@ -817,6 +872,31 @@ void mouseReleased() {
  * post: none
  */
 void keyPressed() {
+  switch (menuState) { // for buttons
+    case 0: //main menu
+      
+      //press enter: play from main menu 
+      if (key == ENTER) {
+        buttonPressed = 1;
+      }
+      
+      break;
+      
+    case 1: //gameplay 
+      
+      //press tab: pause
+      if (key == TAB) {
+        buttonPressed = 1;
+      }
+      break;
+      
+    case 2: //paused
+      //press tab: play
+      if (key == TAB) {
+        buttonPressed = 1;
+      }
+      break;
+  }
   //d/D: move right
   if (key == 'd' || key == 'D') {
     moveRight = true;
@@ -833,26 +913,12 @@ void keyPressed() {
     attacking = true;
   }
   
-  //tab: pause/play
-  if (key == TAB) {
-    if (menuState == 1) {
-      menuState = 2;
-    } else if (menuState == 2) {
-      menuState = 1;
-    }
-  }
-  
-  //play from main menu
-  if (menuState == 0 && key == ENTER) {
-    menuState = 1;
-  }
-  
   //' '/w/W: jump
   if ((key == ' ' || key == 'w' || key == 'W') && !jumping && !falling) {
     jumping = true;
     jumpFrame = 0;
   }
-
+  
   //DEBUG ONLY: kill all zombies with '~'
   if (key == '~') {
     for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
@@ -861,12 +927,42 @@ void keyPressed() {
   }
 }
 
+
 /**
  * detects key releases and does the corresponding action to releasing that key
  * pre: none
  * post: none
  */
 void keyReleased() {
+  switch (menuState) { // for buttons
+    case 0: //main menu
+      
+      //release enter: play from main menu
+      if (key == ENTER) {
+        menuState = 1; //set to gameplay
+        buttonPressed = 0; //reset
+      }
+      
+      break;
+      
+    case 1: //gameplay 
+      
+      //release tab: pause
+      if (key == TAB) {
+        menuState = 2; //set to pause menu
+        buttonPressed = 0; //reset
+      }
+      break;
+      
+    case 2: //paused
+      //release tab: play
+      if (key == TAB) {
+        menuState = 1; //set to gameplay
+        buttonPressed = 0; //reset
+      }
+      break;
+  }
+  
   //d/D: stop moving right
   if (key == 'd' || key == 'D') {
 
