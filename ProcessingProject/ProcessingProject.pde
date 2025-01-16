@@ -1,4 +1,4 @@
-/** //<>//
+/**
  * This program is a game in which the user plays as a knight fighting against monsters and trying to survive through increasingly difficult waves.
  * When run, the user is presented with a game menu in which they can access settings, save their game, and
  * The user can press a and d to move left or right, space to jump, and j to attack.
@@ -264,9 +264,7 @@ void draw() {
       textAlign(CENTER, CENTER);
       text("FORTRESS FIGHT", 710, 130);
       
-      //buttons
-      imageMode(CENTER);
-      
+      //BUTTONS:
       //big play button
       if (buttonPressed != 1) { //big play button not pressed
         image(bigPlayButtonUp, 700, 450, 230, 230); 
@@ -802,6 +800,44 @@ void draw() {
       
     case 4: //saved games
       background(bgBricks);
+      
+      
+      //BUTTONS:
+      imageMode(CENTER);
+      
+      //load slot 1 
+      textFont(mainFont, 70);
+      if (buttonPressed != 1) { //load slot 1 button not pressed
+        image(buttonShapeUp, 400, 450, 400, 200); 
+        text("Load Slot 1", 400, 450);
+        
+      } else { //load slot 1 button pressed
+        image(buttonShapeDown, 400, 450, 400, 200);
+        text("Load Slot 1", 400, 463);
+      }
+      
+      //load slot 2
+      textFont(mainFont, 70);
+      if (buttonPressed != 2) { //load slot 2 button not pressed
+        image(buttonShapeUp, 1000, 450, 400, 200); 
+        text("Load Slot 2", 1000, 450);
+        
+      } else { //load slot 2 button pressed
+        image(buttonShapeDown, 1000, 450, 400, 200);
+        text("Load Slot 2", 1000, 463);
+      }
+      
+      //back button
+      textFont(mainFont, 70);
+      if (buttonPressed != 3) { //back button not pressed
+        image(buttonShapeUp, 700, 200, 300, 150); 
+        text("Back", 700, 200);
+        
+      } else { //back button pressed
+        image(buttonShapeDown, 700, 200, 300, 150);
+        text("Back", 700, 213);
+      }
+      
       break;
   }
 } //END DRAW METHOD
@@ -834,13 +870,12 @@ void mousePressed() {
         buttonPressed = 1;
         
       //press help button
-      } else if (mouseX > 100 && mouseX < 500 && mouseY > 350 && mouseY < 450) {
+      } else if (mouseX > 100 && mouseX < 500 && mouseY > 350 && mouseY < 550) {
         buttonPressed = 2;
         
       //press saved games button
-      } else if (mouseX > 900 && mouseX < 1300 && mouseY > 350 && mouseY < 450) {
+      } else if (mouseX > 900 && mouseX < 1300 && mouseY > 350 && mouseY < 550) {
         buttonPressed = 3;
-      
       }
       
       break;
@@ -862,6 +897,21 @@ void mousePressed() {
       // press play button
       if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) { 
         buttonPressed = 1;
+      }
+      break;
+      
+    case 4:
+      //press load slot 1 button
+      if (mouseX > 200 && mouseX < 600 && mouseY > 350 && mouseY < 550) {
+        buttonPressed = 1;
+        
+      //press load slot 2 button
+      } else if (mouseX > 800 && mouseX < 1200 && mouseY > 350 && mouseY < 550) {
+        buttonPressed = 2;
+        
+      //press back button
+      } else if (mouseX > 625 && mouseX < 775 && mouseY > 50 && mouseY < 350) {
+        buttonPressed = 3;
       }
       break;
   }
@@ -918,6 +968,23 @@ void mouseReleased() {
         buttonPressed = 0; //reset
       }
       break;
+    
+    case 4:
+      //release load slot 1 button
+      if (buttonPressed == 1) {
+        buttonPressed = 0;
+        
+      //release load slot 2 button
+      } else if (buttonPressed == 2) {
+        buttonPressed = 0;
+      
+      //release backbutton
+      } else if (buttonPressed == 3) {
+        buttonPressed = 0;
+        menuState = 0;
+      }
+      break;
+    
   }
   
 }
