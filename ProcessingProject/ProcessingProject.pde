@@ -156,6 +156,20 @@ PImage titleShape;
 //declare fonts:
 PFont mainFont;
 
+
+/*FILE SYSTEM:
+Line 1: wave
+Line 2: score
+Line 3: zombies killed
+*/
+//declare file I/O objects
+BufferedReader readerSlot1;
+BufferedReader readerSlot2;
+String line;
+PrintWriter writerSlot1;
+PrintWriter writerSlot2;
+
+
 //menu state variable:
 //0: main menu
 //1: gameplay
@@ -178,7 +192,11 @@ void setup() {
   //set size of canvas: 1400px wide, 700px tall
   size(1400, 700);
 
-
+  //create BufferedReaders and PrintWriters
+  readerSlot1 = createReader("saveSlot1.txt"); 
+  readerSlot2 = createReader("saveSlot2.txt");
+  writerSlot1 = createWriter("saveSlot1.txt"); 
+  writerSlot2 = createWriter("saveSlot2.txt");
 
   //load knight images
   knightLeftUp = loadImage("knightLeftUp.png");
@@ -892,7 +910,7 @@ void mousePressed() {
       
       //press pause button
       if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) { 
-        buttonPressed = 1;
+        buttonPressed = 1;  
       }
       
       break;
@@ -978,9 +996,11 @@ void mouseReleased() {
       if (buttonPressed == 1) {
         buttonPressed = 0;
         
+        
       //release load slot 2 button
       } else if (buttonPressed == 2) {
         buttonPressed = 0;
+        
       
       //release backbutton
       } else if (buttonPressed == 3) {
