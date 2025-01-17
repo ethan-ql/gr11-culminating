@@ -798,44 +798,48 @@ void draw() {
       background(bgBricks);
       break;
       
-    case 4: //saved games
+    case 4: //saved games menu
       background(bgBricks);
       
-      
-      //BUTTONS:
       imageMode(CENTER);
       
+      //TITLE:
+      textFont(mainFont, 100);
+      image(titleShape, 700, 100, 900, 120);
+      text("SAVED GAMES", 700, 100);
+      
+      //BUTTONS:      
       //load slot 1 
       textFont(mainFont, 70);
       if (buttonPressed != 1) { //load slot 1 button not pressed
-        image(buttonShapeUp, 400, 450, 400, 200); 
-        text("Load Slot 1", 400, 450);
+        image(buttonShapeUp, 400, 375, 400, 200); 
+        text("Load Slot 1", 400, 375);
         
       } else { //load slot 1 button pressed
-        image(buttonShapeDown, 400, 450, 400, 200);
-        text("Load Slot 1", 400, 463);
+        image(buttonShapeDown, 400, 375, 400, 200);
+        text("Load Slot 1", 400, 388);
       }
       
       //load slot 2
       textFont(mainFont, 70);
       if (buttonPressed != 2) { //load slot 2 button not pressed
-        image(buttonShapeUp, 1000, 450, 400, 200); 
-        text("Load Slot 2", 1000, 450);
+        image(buttonShapeUp, 1000, 375, 400, 200); 
+        text("Load Slot 2", 1000, 375);
         
       } else { //load slot 2 button pressed
-        image(buttonShapeDown, 1000, 450, 400, 200);
-        text("Load Slot 2", 1000, 463);
+        image(buttonShapeDown, 1000, 375, 400, 200);
+        text("Load Slot 2", 1000, 388);
       }
       
       //back button
       textFont(mainFont, 70);
       if (buttonPressed != 3) { //back button not pressed
-        image(buttonShapeUp, 700, 200, 300, 150); 
-        text("Back", 700, 200);
+        image(buttonShapeUp, 700, 600, 300, 150); 
+        text("Back", 700, 600);
         
       } else { //back button pressed
-        image(buttonShapeDown, 700, 200, 300, 150);
-        text("Back", 700, 213);
+        image(buttonShapeDown, 700, 600, 300, 150);
+        text("Back", 700, 613);
       }
       
       break;
@@ -900,17 +904,17 @@ void mousePressed() {
       }
       break;
       
-    case 4:
+    case 4: //save games menu 
       //press load slot 1 button
-      if (mouseX > 200 && mouseX < 600 && mouseY > 350 && mouseY < 550) {
+      if (mouseX > 200 && mouseX < 600 && mouseY > 275 && mouseY < 475) {
         buttonPressed = 1;
         
       //press load slot 2 button
-      } else if (mouseX > 800 && mouseX < 1200 && mouseY > 350 && mouseY < 550) {
+      } else if (mouseX > 800 && mouseX < 1200 && mouseY > 275 && mouseY < 475) {
         buttonPressed = 2;
         
       //press back button
-      } else if (mouseX > 625 && mouseX < 775 && mouseY > 50 && mouseY < 350) {
+      } else if (mouseX > 625 && mouseX < 775 && mouseY > 525 && mouseY < 675) {
         buttonPressed = 3;
       }
       break;
