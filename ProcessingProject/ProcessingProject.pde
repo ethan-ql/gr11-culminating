@@ -165,9 +165,9 @@ Line 3: zombies killed
 //declare file I/O objects
 BufferedReader readerSlot1;
 BufferedReader readerSlot2;
-String line;
 PrintWriter writerSlot1;
 PrintWriter writerSlot2;
+int savedWave;
 
 
 //menu state variable:
@@ -195,8 +195,7 @@ void setup() {
   //create BufferedReaders and PrintWriters
   readerSlot1 = createReader("saveSlot1.txt"); 
   readerSlot2 = createReader("saveSlot2.txt");
-  writerSlot1 = createWriter("saveSlot1.txt"); 
-  writerSlot2 = createWriter("saveSlot2.txt");
+
 
   //load knight images
   knightLeftUp = loadImage("knightLeftUp.png");
@@ -278,7 +277,7 @@ void draw() {
       imageMode(CENTER);
       image(titleShape, 700, 130, 1350, 180);
       textFont(mainFont, 160);
-      fill(145, 50, 205);
+      fill(145, 50, 205); //purple
       textAlign(CENTER, CENTER);
       text("FORTRESS FIGHT", 710, 130);
       
@@ -741,7 +740,11 @@ void draw() {
       if (zombiesKilled >= zombiesPerWave) {
         nextWave();
       }
+      
       break;
+  
+  
+  
   
     case 2: //paused
       background(bgBricks);
@@ -766,7 +769,6 @@ void draw() {
       fill(255, 255, 255);
       textAlign(LEFT, TOP);
       text("KNIGHT HP", 50, 20);
-  
   
   
       //wave progress bar:
@@ -801,7 +803,8 @@ void draw() {
       fill(255, 255, 255);
       textAlign(CENTER, TOP);
       text("SCORE: \n"+score, 875, 25);
-  
+      
+      //BUTTONS:  
       //draw play button
       imageMode(CENTER);
       if (buttonPressed != 1) { //play button not pressed
@@ -810,6 +813,32 @@ void draw() {
       } else { //play button being pressed
         image(playButtonDown, 700, 60, 80, 80);
       }
+      
+      fill(145, 50, 205); //purple
+      textAlign(CENTER, CENTER);
+      
+      //save slot 1 
+      textFont(mainFont, 70);
+      if (buttonPressed != 2) { //save slot 1 button not pressed
+        image(buttonShapeUp, 400, 475, 400, 200); 
+        text("Save: Slot 1", 400, 475);
+        
+      } else { //save slot 1 button pressed
+        image(buttonShapeDown, 400, 475, 400, 200);
+        text("Save: Slot 1", 400, 488);
+      }
+      
+      //save slot 2
+      textFont(mainFont, 70);
+      if (buttonPressed != 3) { //save slot 2 button not pressed
+        image(buttonShapeUp, 1000, 475, 400, 200); 
+        text("Save: Slot 2", 1000, 475);
+        
+      } else { //save slot 2 button pressed
+        image(buttonShapeDown, 1000, 475, 400, 200);
+        text("Save: Slot 2", 1000, 488);
+      }
+      
       break;
     
     case 3: //help menu
@@ -919,6 +948,14 @@ void mousePressed() {
       // press play button
       if (mouseX > 660 && mouseX < 740 && mouseY > 20 && mouseY < 100) { 
         buttonPressed = 1;
+        
+      //press save slot 1 button
+      } else if (mouseX > 200 && mouseX < 600 && mouseY > 375 && mouseY < 575) {
+        buttonPressed = 2;
+        
+      //press save slot 2 button
+      } else if (mouseX > 800 && mouseX < 1200 && mouseY > 375 && mouseY < 575) {
+        buttonPressed = 3;
       }
       break;
       
@@ -932,7 +969,7 @@ void mousePressed() {
         buttonPressed = 2;
         
       //press back button
-      } else if (mouseX > 625 && mouseX < 775 && mouseY > 525 && mouseY < 675) {
+      } else if (mouseX > 550 && mouseX < 850 && mouseY > 525 && mouseY < 675) {
         buttonPressed = 3;
       }
       break;
@@ -988,6 +1025,39 @@ void mouseReleased() {
       if (buttonPressed == 1) { 
         menuState = 1;
         buttonPressed = 0; //reset
+        
+      //release save slot 1 button
+      } else if (buttonPressed == 2) {
+        buttonPressed = 0; //reset
+        
+        //"create" the save file by clearing it from all current text
+        writerSlot1 = createWriter("saveSlot1.txt");
+        
+        //print stats to file
+        writerSlot1.println(wave);
+        writerSlot1.println(score);
+        writerSlot1.println(zombiesKilled);
+        
+        //flush and close writer to ensure the text is written to the file
+        writerSlot1.flush();
+        writerSlot1.close();
+        
+        
+      //release save slot 2 button
+      } else if (buttonPressed == 3) {
+        buttonPressed = 0; //reset
+        
+        //"create" the save file by clearing it from all current text
+        writerSlot2 = createWriter("saveSlot2.txt");
+        
+        //print stats to file
+        writerSlot2.println(wave);
+        writerSlot2.println(score);
+        writerSlot2.println(zombiesKilled);
+        
+        //flush and close writer to ensure the text is written to the file
+        writerSlot2.flush();
+        writerSlot2.close();
       }
       break;
     
@@ -995,11 +1065,43 @@ void mouseReleased() {
       //release load slot 1 button
       if (buttonPressed == 1) {
         buttonPressed = 0;
+        menuState = 1; //set to gameplay
+        try {
+          
+          savedWave = Integer.parseInt(readerSlot1.readLine()); // store saved wave in a seperate variable so that the readLine method is only called once
+          while (wave < savedWave) {
+            nextWave(); //call nextWave repeatedly to instantaneoulsy go to the correct wave
+          }
+          score = Integer.parseInt(readerSlot1.readLine()); //set the correct score
+          zombiesKilled = Integer.parseInt(readerSlot1.readLine()); //set the correct zombiesKilled
+          zombiesSpawned = zombiesKilled; //to simplify saving process, zombiesSpawned and zombiesKilled are equal
+          
+        } catch (IOException e) { //thrown when reading a line
+          e.printStackTrace(); //print stack trace to console (which describes the nature of the error)
+        } catch (NumberFormatException e) { //thrown if the line is blank
+          println("ERROR: file is empty or did not save properly."); //print error message to console
+        }
         
         
       //release load slot 2 button
       } else if (buttonPressed == 2) {
         buttonPressed = 0;
+        menuState = 1; //set to gameplay
+        try {
+          
+          savedWave = Integer.parseInt(readerSlot2.readLine()); // store saved wave in a seperate variable so that the readLine method is only called once
+          while (wave < savedWave) {
+            nextWave(); //call nextWave repeatedly to instantaneoulsy go to the correct wave
+          }
+          score = Integer.parseInt(readerSlot2.readLine()); //set the correct score
+          zombiesKilled = Integer.parseInt(readerSlot2.readLine()); //set the correct zombiesKilled
+          zombiesSpawned = zombiesKilled; //to simplify saving process, zombiesSpawned and zombiesKilled are equal
+          
+        } catch (IOException e) { //thrown when reading a line
+          e.printStackTrace(); //print stack trace to console (which describes the nature of the error)
+        } catch (NumberFormatException e) { //thrown if the line is blank
+          println("ERROR: file is empty or did not save properly."); //print error message to console
+        }
         
       
       //release backbutton
