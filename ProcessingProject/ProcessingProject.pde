@@ -113,6 +113,7 @@ int zombiesPerSpawn = 1;
 int zombiesPerWave = 3;
 int wave = 1;
 int score = 0;
+String difficulty = "Easy";
 
 
 //FONTS AND IMAGES NEED TO BE DECLARED GLOBALLY AND INITALIZED IN SETUP
@@ -149,6 +150,8 @@ PImage bigPlayButtonUp;
 PImage bigPlayButtonDown;
 PImage buttonShapeUp;
 PImage buttonShapeDown;
+PImage longButtonShapeUp;
+PImage longButtonShapeDown;
 
 //declare misc images
 PImage titleShape;
@@ -158,9 +161,11 @@ PFont mainFont;
 
 
 /*FILE SYSTEM:
-Line 1: wave
-Line 2: score
-Line 3: zombies killed
+Line 1: difficulty
+Line 2: wave
+Line 3: score
+Line 4: characterHp
+Line 5: zombiesKilled
 */
 //declare file I/O objects
 BufferedReader readerSlot1;
@@ -191,6 +196,7 @@ int buttonPressed = 0;
 void setup() {
   //set size of canvas: 1400px wide, 700px tall
   size(1400, 700);
+  
 
   //create BufferedReaders and PrintWriters
   readerSlot1 = createReader("saveSlot1.txt"); 
@@ -230,6 +236,8 @@ void setup() {
   bigPlayButtonDown = loadImage("bigPlayButtonDown.png");
   buttonShapeUp = loadImage("buttonShapeUp.png");
   buttonShapeDown = loadImage("buttonShapeDown.png");
+  longButtonShapeUp = loadImage("longButtonShapeUp.png");
+  longButtonShapeDown = loadImage("longButtonShapeDown.png");
   
   //load misc images
   titleShape = loadImage("titleShape.png");
@@ -284,37 +292,44 @@ void draw() {
       //BUTTONS:
       //big play button
       if (buttonPressed != 1) { //big play button not pressed
-        image(bigPlayButtonUp, 700, 450, 230, 230); 
+        image(bigPlayButtonUp, 700, 400, 230, 230); 
         
       } else { //big play button pressed
-        image(bigPlayButtonDown, 700, 450, 230, 230);
+        image(bigPlayButtonDown, 700, 400, 230, 230);
       }
       
       //help 
       textFont(mainFont, 90);
       if (buttonPressed != 2) { //help button not pressed
-        image(buttonShapeUp, 300, 450, 400, 200); 
-        text("Help", 300, 450);
+        image(buttonShapeUp, 300, 400, 400, 200); 
+        text("Help", 300, 400);
         
       } else { //help button pressed
-        image(buttonShapeDown, 300, 450, 400, 200);
-        text("Help", 300, 463);
+        image(buttonShapeDown, 300, 400, 400, 200);
+        text("Help", 300, 413);
       }
-      
-      
-      
+           
       //saved games 
       textFont(mainFont, 70);
       if (buttonPressed != 3) { //saved games button not pressed
-        image(buttonShapeUp, 1100, 450, 400, 200); 
-        text("Saved\nGames", 1100, 450);
+        image(buttonShapeUp, 1100, 400, 400, 200); 
+        text("Saved\nGames", 1100, 400);
         
       } else { //saved games button pressed
-        image(buttonShapeDown, 1100, 450, 400, 200);
-        text("Saved\nGames", 1100, 463);
+        image(buttonShapeDown, 1100, 400, 400, 200);
+        text("Saved\nGames", 1100, 413);
       }
       
-      
+      //toggle difficulty 
+      textFont(mainFont, 60);
+      if (buttonPressed != 4) { //toggle difficulty button not pressed
+        image(longButtonShapeUp, 700, 610, 675, 135); 
+        text("Toggle Difficulty: "+difficulty, 700, 610);
+        
+      } else { //toggle difficulty button pressed
+        image(longButtonShapeDown, 700, 610, 675, 135);
+        text("Toggle Difficulty: "+difficulty, 700, 623);
+      }
       
       
       break;
@@ -917,16 +932,20 @@ void mousePressed() {
     case 0: //main menu
       
       //press big play button
-      if (mouseX > 585 && mouseX < 815 && mouseY > 335 && mouseY < 585) {
+      if (mouseX > 585 && mouseX < 815 && mouseY > 285 && mouseY < 515) {
         buttonPressed = 1;
         
       //press help button
-      } else if (mouseX > 100 && mouseX < 500 && mouseY > 350 && mouseY < 550) {
+      } else if (mouseX > 100 && mouseX < 500 && mouseY > 300 && mouseY < 500) {
         buttonPressed = 2;
         
       //press saved games button
-      } else if (mouseX > 900 && mouseX < 1300 && mouseY > 350 && mouseY < 550) {
+      } else if (mouseX > 900 && mouseX < 1300 && mouseY > 300 && mouseY < 500) {
         buttonPressed = 3;
+        
+      //press toggle difficulty button 700, 610, 675, 135
+      } else if (mouseX > 362.5 && mouseX < 1037.5 && mouseY > 542.5 && mouseY < 677.5) {
+        buttonPressed = 4;
       }
       
       break;
@@ -989,16 +1008,31 @@ void mouseReleased() {
       //release big play button
       if (buttonPressed == 1) {
         menuState = 1;
+        initializeGameplay();
         buttonPressed = 0; //reset
         
       //release help button
-      } if (buttonPressed == 2) {
+      } else if (buttonPressed == 2) {
         menuState = 3;
         buttonPressed = 0; //reset
         
       //release saved games button
-      } if (buttonPressed == 3) {
+      } else if (buttonPressed == 3) {
         menuState = 4;
+        buttonPressed = 0; //reset
+      
+      //release toggle difficulty button
+      } else if (buttonPressed == 4) {
+        
+        //cycle difficulty from easy to mid, mid to hard, hard to easy, with each toggle
+        if (difficulty.equals("Easy")) {
+          difficulty = "Mid";
+        } else if (difficulty.equals("Mid")) {
+          difficulty = "Hard";
+        } else if (difficulty.equals("Hard")) {
+          difficulty = "Easy";
+        }
+        
         buttonPressed = 0; //reset
       }
       
@@ -1034,8 +1068,10 @@ void mouseReleased() {
         writerSlot1 = createWriter("saveSlot1.txt");
         
         //print stats to file
+        writerSlot1.println(difficulty);
         writerSlot1.println(wave);
         writerSlot1.println(score);
+        writerSlot1.println(characterHp);
         writerSlot1.println(zombiesKilled);
         
         //flush and close writer to ensure the text is written to the file
@@ -1051,8 +1087,10 @@ void mouseReleased() {
         writerSlot2 = createWriter("saveSlot2.txt");
         
         //print stats to file
+        writerSlot2.println(difficulty);
         writerSlot2.println(wave);
         writerSlot2.println(score);
+        writerSlot2.println(characterHp);
         writerSlot2.println(zombiesKilled);
         
         //flush and close writer to ensure the text is written to the file
@@ -1066,14 +1104,17 @@ void mouseReleased() {
       if (buttonPressed == 1) {
         buttonPressed = 0;
         menuState = 1; //set to gameplay
+        
         try {
-          
+          //set all values to values in the file
+          difficulty = readerSlot1.readLine(); 
           savedWave = Integer.parseInt(readerSlot1.readLine()); // store saved wave in a seperate variable so that the readLine method is only called once
           while (wave < savedWave) {
             nextWave(); //call nextWave repeatedly to instantaneoulsy go to the correct wave
           }
-          score = Integer.parseInt(readerSlot1.readLine()); //set the correct score
-          zombiesKilled = Integer.parseInt(readerSlot1.readLine()); //set the correct zombiesKilled
+          score = Integer.parseInt(readerSlot1.readLine());
+          characterHp = Integer.parseInt(readerSlot1.readLine());
+          zombiesKilled = Integer.parseInt(readerSlot1.readLine());
           zombiesSpawned = zombiesKilled; //to simplify saving process, zombiesSpawned and zombiesKilled are equal
           
         } catch (IOException e) { //thrown when reading a line
@@ -1087,14 +1128,18 @@ void mouseReleased() {
       } else if (buttonPressed == 2) {
         buttonPressed = 0;
         menuState = 1; //set to gameplay
+        
         try {
-          
+          //set all values to values in the file
+          difficulty = readerSlot2.readLine(); 
+          initializeGameplay();
           savedWave = Integer.parseInt(readerSlot2.readLine()); // store saved wave in a seperate variable so that the readLine method is only called once
           while (wave < savedWave) {
             nextWave(); //call nextWave repeatedly to instantaneoulsy go to the correct wave
           }
-          score = Integer.parseInt(readerSlot2.readLine()); //set the correct score
-          zombiesKilled = Integer.parseInt(readerSlot2.readLine()); //set the correct zombiesKilled
+          score = Integer.parseInt(readerSlot2.readLine()); 
+          characterHp = Integer.parseInt(readerSlot2.readLine());
+          zombiesKilled = Integer.parseInt(readerSlot2.readLine()); 
           zombiesSpawned = zombiesKilled; //to simplify saving process, zombiesSpawned and zombiesKilled are equal
           
         } catch (IOException e) { //thrown when reading a line
@@ -1170,12 +1215,7 @@ void keyPressed() {
     jumpFrame = 0;
   }
   
-  //DEBUG ONLY: kill all zombies with '~'
-  if (key == '~') {
-    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-      killZombie(zombieIndex);
-    }
-  }
+  
 }
 
 
@@ -1191,6 +1231,7 @@ void keyReleased() {
       //release enter: play from main menu
       if (key == ENTER) {
         menuState = 1; //set to gameplay
+        initializeGameplay();
         buttonPressed = 0; //reset
       }
       
@@ -1243,29 +1284,65 @@ void keyReleased() {
   }
 }
 
+
+void initializeGameplay() {
+  //easy difficulty:
+  if (difficulty.equals("Easy")) {
+    zombieDamage = 5;
+    zombieMaxHp = 90;
+    characterDamage = 70;
+    zombieSpeed = 0.8;
+    zombiesPerWave = 2;
+    zombiesPerSpawn = 1;
+    
+  //mid difficulty:
+  } else if (difficulty.equals("Mid")) {
+    zombieDamage = 10;
+    zombieMaxHp = 100;
+    characterDamage = 50;
+    zombieSpeed = 1.2;
+    zombiesPerWave = 3;
+    zombiesPerSpawn = 1;
+    
+  //hard difficulty
+  } else if (difficulty.equals("Hard")) {
+    zombieDamage = 20;
+    zombieMaxHp = 130;
+    characterDamage = 50;
+    zombieSpeed = 2.2;
+    zombiesPerWave = 4;
+    zombiesPerSpawn = 2;
+  }
+}
+
 /**
  * checks if the character is on one of the platforms
  * pre: none
  * post: wave variable is incremented, zombieDamage and zombieHp and zombieSpeed increased, zombiesKilled and zombiesSpawned reset to zero, refill characterHp to full
  */
 void nextWave() {
+  wave++;
+  
   //kill all zombies to be sure
   for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
     killZombie(zombieIndex);
   }
-  wave++;
+  
+  //variables changed to increase difficulty
   zombieDamage += 1;
   zombieMaxHp += 15;
-  zombieSpeed += 0.1;
+  zombieSpeed += 0.15;
   zombiesPerWave += 1;
+  zombieSpawnFrequency -= 20;
   if (wave % 4 == 0) { //increase zombies per spawn and reset spawn frequency every 4 waves
     zombiesPerSpawn++;
     zombieSpawnFrequency = 300;
   }
+  
+  //variables that need to be resetted
   zombiesKilled = 0;
   zombiesSpawned = 0;
   characterHp = maxCharacterHp;
-  zombieSpawnFrequency -= 20;
 }
 
 /**
