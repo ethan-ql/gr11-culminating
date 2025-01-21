@@ -185,9 +185,7 @@ int savedWave;
 //4: saved games
 int menuState = 0;
 
-//buttonPressed variable:
-//0: nothing
-//1: big play/play/pause
+//buttonPressed variable: takes on various integer values that represent different buttons in each menu
 int buttonPressed = 0;
 
 /**
@@ -869,27 +867,46 @@ void draw() {
       image(titleShape, 700, 100, 900, 120);
       text("HELP", 700, 100);
       
+      //DESCRIPTION
+      fill(255, 255, 255);
+      textSize(35);
+      text("Welcome to Fortress Fight! You are a fierce knight, defending your castle\nagainst endless hordes of zombies. Use the controls shown below to destroy them!", 700, 220);
+      
+      //KEYBOARD
       imageMode(CENTER);
       image(keyboard, 575, 425, 1038, 276);
       image(controlsShape, 1250, 425, 210, 280);
       
+      //COLOURED LEGEND
       textSize(55);
-      
-      //pause coloured text
+      //"pause" coloured text
       fill(255, 194, 14); //yellow
       text("Pause", 1250, 325);
       
-      //jump coloured text
+      //"jump" coloured text
       fill(34, 177, 76); //green
       text("Jump", 1250, 390);
       
-      //move coloured text
+      //"move" coloured text
       fill(77, 109, 243); // blue
       text("Move", 1250, 455);
       
-      //attack coloured text
+      //"attack" coloured text
       fill(237, 28, 36); //red
       text("Attack", 1250, 520);
+      
+      
+      //back button
+      fill(145, 50, 205); //purple
+      textFont(mainFont, 70);
+      if (buttonPressed != 1) { //back button not pressed
+        image(buttonShapeUp, 700, 631, 240, 120); 
+        text("Back", 700, 631);
+        
+      } else { //back button pressed
+        image(buttonShapeDown, 700, 631, 240, 120);
+        text("Back", 700, 642);
+      }
       
       
       
@@ -1014,6 +1031,15 @@ void mousePressed() {
       }
       break;
       
+    case 3: //help
+      //back button
+      if (mouseX > 550 && mouseX < 850 && mouseY > 525 && mouseY < 675) {
+        buttonPressed = 1;
+      }
+      break;
+      
+      
+      
     case 4: //save games menu 
       //press load slot 1 button
       if (mouseX > 200 && mouseX < 600 && mouseY > 275 && mouseY < 475) {
@@ -1135,6 +1161,14 @@ void mouseReleased() {
       }
       break;
     
+    case 3:
+      //release back button
+      if (buttonPressed == 1) {
+        buttonPressed = 0;
+        menuState = 0;
+      }
+      break;
+    
     case 4:
       //release load slot 1 button
       if (buttonPressed == 1) {
@@ -1185,7 +1219,7 @@ void mouseReleased() {
         }
         
       
-      //release backbutton
+      //release back button
       } else if (buttonPressed == 3) {
         buttonPressed = 0;
         menuState = 0;
@@ -1391,7 +1425,14 @@ void gameOver() {
   fill(255, 0, 0);
   textAlign(CENTER);
   text("GAME OVER", 700, 300);
-  noLoop();
+  menuState = 0;
+  characterHp = maxCharacterHp;
+  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+    killZombie(zombieIndex);
+  }
+  score = 0;
+  wave = 1;
+  zombiesKilled = 0;
 }
 
 
