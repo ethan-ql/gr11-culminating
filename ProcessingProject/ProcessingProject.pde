@@ -153,8 +153,10 @@ PImage buttonShapeDown;
 PImage longButtonShapeUp;
 PImage longButtonShapeDown;
 
-//declare misc images
+//declare other menu images
 PImage titleShape;
+PImage keyboard;
+PImage controlsShape;
 
 //declare fonts:
 PFont mainFont;
@@ -239,8 +241,10 @@ void setup() {
   longButtonShapeUp = loadImage("longButtonShapeUp.png");
   longButtonShapeDown = loadImage("longButtonShapeDown.png");
   
-  //load misc images
+  //load other menu images
   titleShape = loadImage("titleShape.png");
+  keyboard = loadImage("keyboard.png");
+  controlsShape = loadImage("controlsShape.png");
   
   //load and set font to tiny5
   mainFont = createFont("Tiny5-Regular.ttf", 150);
@@ -858,6 +862,37 @@ void draw() {
     
     case 3: //help menu
       background(bgBricks);
+      
+      //TITLE:
+      fill(145, 50, 205); //purple
+      textFont(mainFont, 100);
+      image(titleShape, 700, 100, 900, 120);
+      text("HELP", 700, 100);
+      
+      imageMode(CENTER);
+      image(keyboard, 575, 425, 1038, 276);
+      image(controlsShape, 1250, 425, 210, 280);
+      
+      textSize(55);
+      
+      //pause coloured text
+      fill(255, 194, 14); //yellow
+      text("Pause", 1250, 325);
+      
+      //jump coloured text
+      fill(34, 177, 76); //green
+      text("Jump", 1250, 390);
+      
+      //move coloured text
+      fill(77, 109, 243); // blue
+      text("Move", 1250, 455);
+      
+      //attack coloured text
+      fill(237, 28, 36); //red
+      text("Attack", 1250, 520);
+      
+      
+      
       break;
       
     case 4: //saved games menu
@@ -866,6 +901,7 @@ void draw() {
       imageMode(CENTER);
       
       //TITLE:
+      fill(145, 50, 205); //purple
       textFont(mainFont, 100);
       image(titleShape, 700, 100, 900, 120);
       text("SAVED GAMES", 700, 100);
