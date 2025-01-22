@@ -1,11 +1,11 @@
 /**
- * This program is a game in which the user plays as a knight fighting against monsters and trying to survive through increasingly difficult waves.
- * When run, the user is presented with a game menu in which they can access settings, save their game, and
- * The user can press a and d to move left or right, space to jump, and j to attack.
+ * Fortress Fight is a game in which the user plays as a knight fighting against monsters and trying to survive through increasingly difficult waves.
+ * When run, the user is presented with a game menu in which they can access help (how to play the game, controls), save their game, toggle the difficulty, and play the game.
+ * The controls are versatile; multiple keys do the same things in order to accomodate for what different players are comfortable with.
  *
  * @author  Ethan Lau
  * @version 1.0
- * @since   2025-1-1
+ * @since   2025-1-21
  */
 
 
