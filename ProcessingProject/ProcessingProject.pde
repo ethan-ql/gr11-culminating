@@ -78,7 +78,7 @@ int maxCharacterHp = 100; //will be changed using upgrades
 int characterHp = 100; //100%
 
 final double CHARACTER_SPEED = 7; //pixels moved per frame
-final double CHARACTER_KNOCKBACK = 30; //pixels monsters move per hit by character
+final double CHARACTER_KNOCKBACK = 35; //pixels monsters move per hit by character
 
 //characterLevel is used to track last place the character was standing, NOT its exact position
 int characterLevel = 1; //changed to 1 when character stands on ground, changed to 2 when character stands on platform
@@ -187,6 +187,9 @@ int menuState = 0;
 
 //buttonPressed variable: takes on various integer values that represent different buttons in each menu
 int buttonPressed = 0;
+
+//gameOverFrame variable: used to track the frame at which the gameOver() method was first called
+int gameOverFrame = 0;
 
 /**
  * sets up the canvas that processing draws on
@@ -582,7 +585,12 @@ void draw() {
   
   
       //DRAW UI AT TOP OF SCREEN
-  
+      
+      //ensure characterHp doesn't go below 0
+      if (characterHp <= 0) {
+        characterHp = 0;
+      }
+      
       //Character health bar:
       //inside
       rectMode(CORNER);
@@ -740,7 +748,7 @@ void draw() {
   
       //DRAW TRANSPARENT RED ON SCREEN WHEN CHARACTER IS DAMAGED
       for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-        if (zombieDamaging[zombieIndex]) {
+        if (zombieDamaging[zombieIndex] && characterHp > 0) {
           fill(255, 0, 0, 50);
           rect(0, 0, 1400, 700);
         }
@@ -837,23 +845,34 @@ void draw() {
       //save slot 1 
       textFont(mainFont, 70);
       if (buttonPressed != 2) { //save slot 1 button not pressed
-        image(buttonShapeUp, 400, 475, 400, 200); 
-        text("Save: Slot 1", 400, 475);
+        image(buttonShapeUp, 400, 325, 400, 200); 
+        text("Save: Slot 1", 400, 325);
         
       } else { //save slot 1 button pressed
-        image(buttonShapeDown, 400, 475, 400, 200);
-        text("Save: Slot 1", 400, 488);
+        image(buttonShapeDown, 400, 325, 400, 200);
+        text("Save: Slot 1", 400, 338);
       }
       
       //save slot 2
       textFont(mainFont, 70);
       if (buttonPressed != 3) { //save slot 2 button not pressed
-        image(buttonShapeUp, 1000, 475, 400, 200); 
-        text("Save: Slot 2", 1000, 475);
+        image(buttonShapeUp, 1000, 325, 400, 200); 
+        text("Save: Slot 2", 1000, 325);
         
       } else { //save slot 2 button pressed
-        image(buttonShapeDown, 1000, 475, 400, 200);
-        text("Save: Slot 2", 1000, 488);
+        image(buttonShapeDown, 1000, 325, 400, 200);
+        text("Save: Slot 2", 1000, 338);
+      }
+      
+      //back to main menu
+      textFont(mainFont, 60);
+      if (buttonPressed != 4) { //main menu button not pressed
+        image(buttonShapeUp, 700, 550, 400, 200); 
+        text("Back to\nMain Menu", 700, 550);
+        
+      } else { //main menu button pressed
+        image(buttonShapeDown, 700, 550, 400, 200);
+        text("Back to\nMain Menu", 700, 563);
       }
       
       break;
@@ -1005,7 +1024,7 @@ void mousePressed() {
       
     case 1: //gameplay 
       //attacking
-      if (attackFrame >= 0 && attackCooldown == 0) {
+      if (attackFrame >= 0 && attackCooldown == 0 && characterHp > 0) {
         attacking = true;
       }
       
@@ -1022,12 +1041,17 @@ void mousePressed() {
         buttonPressed = 1;
         
       //press save slot 1 button
-      } else if (mouseX > 200 && mouseX < 600 && mouseY > 375 && mouseY < 575) {
+      } else if (mouseX > 200 && mouseX < 600 && mouseY > 225 && mouseY < 425) {
         buttonPressed = 2;
         
       //press save slot 2 button
-      } else if (mouseX > 800 && mouseX < 1200 && mouseY > 375 && mouseY < 575) {
+      } else if (mouseX > 800 && mouseX < 1200 && mouseY > 225 && mouseY < 425) {
         buttonPressed = 3;
+      
+      
+      //press back to main menu button
+      } else if (mouseX > 500 && mouseX < 900 && mouseY > 450 && mouseY < 650) {
+        buttonPressed = 4;
       }
       break;
       
@@ -1158,6 +1182,21 @@ void mouseReleased() {
         //flush and close writer to ensure the text is written to the file
         writerSlot2.flush();
         writerSlot2.close();
+      
+      //release main menu button
+      } else if (buttonPressed == 4) {
+        buttonPressed = 0; //reset
+        menuState = 0;
+        
+        //reset all variables in order to restart the game
+        characterHp = maxCharacterHp;
+        for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+          killZombie(zombieIndex);
+        }
+        score = 0;
+        wave = 1;
+        zombiesKilled = 0;
+        zombiesSpawned = 0;
       }
       break;
     
@@ -1251,7 +1290,7 @@ void keyPressed() {
     case 1: //gameplay 
       
       //press tab: pause
-      if (key == TAB) {
+      if (key == TAB && characterHp > 0) {
         buttonPressed = 1;
       }
       break;
@@ -1264,23 +1303,23 @@ void keyPressed() {
       break;
   }
   //d/D: move right
-  if (key == 'd' || key == 'D') {
+  if ((key == 'd' || key == 'D') && characterHp > 0) {
     moveRight = true;
     facingRight = true;
   
   //a/A: move left
-  } else if (key == 'a' || key == 'A') {
+  } else if ((key == 'a' || key == 'A') && characterHp > 0) {
     moveLeft = true;
     facingRight = false;
   }
   
   //j/J/s/S: attack
-  if ((key == 'j' || key == 'J' || key == 's' || key == 'S') && attackFrame >= 0 && attackCooldown == 0) {
+  if ((key == 'j' || key == 'J' || key == 's' || key == 'S') && attackFrame >= 0 && attackCooldown == 0 && characterHp > 0) {
     attacking = true;
   }
   
   //' '/w/W: jump
-  if ((key == ' ' || key == 'w' || key == 'W') && !jumping && !falling) {
+  if ((key == ' ' || key == 'w' || key == 'W') && !jumping && !falling && characterHp > 0) {
     jumping = true;
     jumpFrame = 0;
   }
@@ -1310,7 +1349,7 @@ void keyReleased() {
     case 1: //gameplay 
       
       //release tab: pause
-      if (key == TAB) {
+      if (key == TAB && characterHp > 0) {
         menuState = 2; //set to pause menu
         buttonPressed = 0; //reset
       }
@@ -1354,7 +1393,11 @@ void keyReleased() {
   }
 }
 
-
+/**
+ * sets certain zombie and character variables to various values to correspond to selected difficulty
+ * pre: none
+ * post: zombies and character are set to act like they should for each difficulty
+ */
 void initializeGameplay() {
   //easy difficulty:
   if (difficulty.equals("Easy")) {
@@ -1425,14 +1468,32 @@ void gameOver() {
   fill(255, 0, 0);
   textAlign(CENTER);
   text("GAME OVER", 700, 300);
-  menuState = 0;
-  characterHp = maxCharacterHp;
-  for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
-    killZombie(zombieIndex);
+  
+  //if gameOverFrame has not been reinitialized to start counting, reinitialize it
+  if (gameOverFrame == 0) {
+    gameOverFrame = frameCount;
+    
+  //if it has been between 0 and 250 frames since gameOver was first called, fill the screen with an increasingly darker black rectangle
+  } else if (frameCount - gameOverFrame < 250 && frameCount - gameOverFrame > 0) {
+    rectMode(CORNER);
+    fill(0, (frameCount - gameOverFrame) * 1.5); //black, alpha value of the fill is set to increasingly larger amounts each frame which decreases transparency
+    rect(0, 0, 1400, 700); //fill the screen
+  
+  //if it has been more than 250 frames since gameOver was first called, go back to main menu and reset variables that need to be resetted to restart the game
+  } else if (frameCount - gameOverFrame > 250) {
+    menuState = 0; // back to main menu
+    
+    //reset variables that need to be resetted to restart the game
+    characterHp = maxCharacterHp;
+    for (int zombieIndex = 0; zombieIndex < MAX_ZOMBIES; zombieIndex++) {
+      killZombie(zombieIndex);
+    }
+    score = 0;
+    wave = 1;
+    zombiesKilled = 0;
+    zombiesSpawned = 0;
+    gameOverFrame = 0; //reset frame counter for gameOver so that it can work next time it is called
   }
-  score = 0;
-  wave = 1;
-  zombiesKilled = 0;
 }
 
 
